@@ -51,6 +51,9 @@ const INITIAL_STATE = {
     centerGap: 2.5,       // in mm (gap between session and center name)
     yearGap: 3,           // in mm (gap between location and academic year)
     footerBottom: 6.5,    // in mm (bottom space/lift for footer)
+    printScale: 90,       // in percentage (75% to 105%), default 90% gives ~17mm side margins
+    cardColGap: 8,        // in mm (horizontal gap between cards)
+    cardRowGap: 10,       // in mm (vertical gap between cards)
     showCutMarks: false,
     mode: 'roles'         // 'roles' or 'members'
   },
@@ -104,6 +107,9 @@ class BadgeApp {
         if (parsed.examInfo.centerGap === undefined) parsed.examInfo.centerGap = 2.5;
         if (parsed.examInfo.yearGap === undefined) parsed.examInfo.yearGap = 3;
         if (parsed.examInfo.footerBottom === undefined) parsed.examInfo.footerBottom = 6.5;
+        if (parsed.examInfo.printScale === undefined || parsed.examInfo.printScale > 92) parsed.examInfo.printScale = 90;
+        if (parsed.examInfo.cardColGap === undefined) parsed.examInfo.cardColGap = 8;
+        if (parsed.examInfo.cardRowGap === undefined) parsed.examInfo.cardRowGap = 10;
         return parsed;
       }
     } catch (e) {
@@ -148,6 +154,14 @@ class BadgeApp {
     this.yearGapVal = document.getElementById('valYearGap');
     this.footerBottomInput = document.getElementById('inputFooterBottom');
     this.footerBottomVal = document.getElementById('valFooterBottom');
+    this.printScaleInput = document.getElementById('inputPrintScale');
+    this.printScaleVal = document.getElementById('valPrintScale');
+    this.printScaleToolbarVal = document.getElementById('valPrintScaleToolbar');
+    this.badgeSideMarginToolbar = document.getElementById('badgeSideMarginToolbar');
+    this.cardColGapInput = document.getElementById('inputCardColGap');
+    this.cardColGapVal = document.getElementById('valCardColGap');
+    this.cardRowGapInput = document.getElementById('inputCardRowGap');
+    this.cardRowGapVal = document.getElementById('valCardRowGap');
     this.showCutMarksCheckbox = document.getElementById('checkboxShowCutMarks');
     this.dividerTypeSelect = document.getElementById('selectDividerType');
     this.groupCustomDivider = document.getElementById('groupCustomDivider');
@@ -215,6 +229,70 @@ class BadgeApp {
     }
     if (this.logoPreview && info.logoUrl) this.logoPreview.src = info.logoUrl;
     if (this.zoomSelect) this.zoomSelect.value = this.state.ui.zoom;
+    this.updateScaleDisplays();
+  }
+
+  getSideMarginMm(scale = this.state.examInfo.printScale, colGap = this.state.examInfo.cardColGap || 8) {
+    const s = scale || 90;
+    const cg = colGap !== undefined ? colGap : 8;
+    const effectiveWidth = (94 * 2 + cg) * (s / 100);
+    const margin = (210 - effectiveWidth) / 2;
+    return Math.max(0, Math.round(margin * 10) / 10);
+  }
+
+  updateScaleDisplays() {
+    const scale = this.state.examInfo.printScale || 90;
+    const colGap = this.state.examInfo.cardColGap !== undefined ? this.state.examInfo.cardColGap : 8;
+    const rowGap = this.state.examInfo.cardRowGap !== undefined ? this.state.examInfo.cardRowGap : 10;
+    const marginMm = this.getSideMarginMm(scale, colGap);
+    const khmerScale = toKhmerNumber(scale);
+    const khmerMargin = toKhmerNumber(marginMm);
+
+    if (this.printScaleInput) this.printScaleInput.value = scale;
+    if (this.printScaleVal) {
+      this.printScaleVal.innerText = `${khmerScale}% (គែមសងខាង ~${khmerMargin} mm)`;
+    }
+    if (this.printScaleToolbarVal) {
+      this.printScaleToolbarVal.innerText = `${khmerScale}%`;
+    }
+    if (this.badgeSideMarginToolbar) {
+      this.badgeSideMarginToolbar.innerText = `គែមសងខាង ~${khmerMargin}mm`;
+    }
+    if (this.cardColGapInput) this.cardColGapInput.value = colGap;
+    if (this.cardColGapVal) this.cardColGapVal.innerText = `${toKhmerNumber(colGap)} mm`;
+    if (this.cardRowGapInput) this.cardRowGapInput.value = rowGap;
+    if (this.cardRowGapVal) this.cardRowGapVal.innerText = `${toKhmerNumber(rowGap)} mm`;
+  }
+
+  applyPrintScale() {
+    const scale = (this.state.examInfo.printScale || 90) / 100;
+    const colGap = (this.state.examInfo.cardColGap !== undefined ? this.state.examInfo.cardColGap : 8) + 'mm';
+    const rowGap = (this.state.examInfo.cardRowGap !== undefined ? this.state.examInfo.cardRowGap : 10) + 'mm';
+
+    document.querySelectorAll('.a4-sheet-grid').forEach(grid => {
+      grid.style.setProperty('zoom', scale, 'important');
+      grid.style.setProperty('transform', 'none', 'important');
+      grid.style.columnGap = colGap;
+      grid.style.rowGap = rowGap;
+    });
+    document.documentElement.style.setProperty('--print-zoom', scale);
+    document.documentElement.style.setProperty('--badge-col-gap', colGap);
+    document.documentElement.style.setProperty('--badge-row-gap', rowGap);
+    this.updateScaleDisplays();
+  }
+
+  adjustPrintScale(delta) {
+    let current = this.state.examInfo.printScale || 90;
+    current = Math.min(105, Math.max(75, current + delta));
+    this.state.examInfo.printScale = current;
+    this.saveState();
+    this.applyPrintScale();
+  }
+
+  setPrintScale(val) {
+    this.state.examInfo.printScale = Math.min(105, Math.max(75, parseInt(val, 10) || 90));
+    this.saveState();
+    this.applyPrintScale();
   }
 
   toggleModeSections(mode) {
@@ -343,6 +421,33 @@ class BadgeApp {
         if (this.footerBottomVal) this.footerBottomVal.innerText = val + ' mm';
         this.saveState();
         this.renderBadgesOnly();
+      });
+    }
+
+    if (this.printScaleInput) {
+      this.printScaleInput.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value, 10) || 94;
+        this.state.examInfo.printScale = val;
+        this.saveState();
+        this.applyPrintScale();
+      });
+    }
+
+    if (this.cardColGapInput) {
+      this.cardColGapInput.addEventListener('input', (e) => {
+        const val = parseFloat(e.target.value) || 8;
+        this.state.examInfo.cardColGap = val;
+        this.saveState();
+        this.applyPrintScale();
+      });
+    }
+
+    if (this.cardRowGapInput) {
+      this.cardRowGapInput.addEventListener('input', (e) => {
+        const val = parseFloat(e.target.value) || 10;
+        this.state.examInfo.cardRowGap = val;
+        this.saveState();
+        this.applyPrintScale();
       });
     }
 
@@ -766,6 +871,16 @@ class BadgeApp {
       sheet.className = `a4-sheet ${this.state.examInfo.showCutMarks ? 'crop-lines' : ''}`;
       sheet.dataset.page = pageNum;
 
+      const grid = document.createElement('div');
+      grid.className = 'a4-sheet-grid';
+      const scale = (this.state.examInfo.printScale || 90) / 100;
+      const colGap = (this.state.examInfo.cardColGap !== undefined ? this.state.examInfo.cardColGap : 8) + 'mm';
+      const rowGap = (this.state.examInfo.cardRowGap !== undefined ? this.state.examInfo.cardRowGap : 10) + 'mm';
+      grid.style.setProperty('zoom', scale, 'important');
+      grid.style.setProperty('transform', 'none', 'important');
+      grid.style.columnGap = colGap;
+      grid.style.rowGap = rowGap;
+
       // Badges for this page: 4 badges per page
       const startIndex = (pageNum - 1) * 4;
       const pageBadges = badges.slice(startIndex, startIndex + 4);
@@ -774,18 +889,21 @@ class BadgeApp {
         const badgeData = pageBadges[i];
         if (badgeData) {
           const badgeEl = this.createBadgeElement(badgeData);
-          sheet.appendChild(badgeEl);
+          grid.appendChild(badgeEl);
         } else {
           // Empty slot placeholder for clean printing or cutting balance
           const emptySlot = document.createElement('div');
           emptySlot.className = 'w-[94mm] h-[134mm] border-2 border-dashed border-slate-200 rounded flex items-center justify-center text-slate-300 text-xs no-print';
           emptySlot.innerText = 'កន្លែងទំនេរ (Empty)';
-          sheet.appendChild(emptySlot);
+          grid.appendChild(emptySlot);
         }
       }
 
+      sheet.appendChild(grid);
       this.previewContainer.appendChild(sheet);
     });
+
+    this.applyPrintScale();
   }
 
   // Create single badge DOM element matching the uploaded image design exactly!
@@ -1019,6 +1137,7 @@ class BadgeApp {
     const origViewMode = this.state.ui.viewMode;
     this.state.ui.viewMode = 'all';
     this.renderPages();
+    this.applyPrintScale();
 
     // Trigger native browser print
     setTimeout(() => {
@@ -1026,6 +1145,7 @@ class BadgeApp {
       // Restore view mode after print dialog closes
       this.state.ui.viewMode = origViewMode;
       this.renderPages();
+      this.applyPrintScale();
     }, 250);
   }
 

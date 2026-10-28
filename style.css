@@ -56,17 +56,26 @@ body {
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
   margin: 0 auto 30px auto;
   box-sizing: border-box;
-  padding: 8mm 6mm;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  page-break-after: always;
+  break-after: page;
+}
+
+/* 2x2 Grid of Badges on A4 Sheet */
+.a4-sheet-grid {
   display: grid;
   grid-template-columns: repeat(2, 94mm);
   grid-template-rows: repeat(2, 134mm);
   justify-content: center;
   align-content: center;
-  column-gap: 8mm;
-  row-gap: 10mm;
-  position: relative;
-  page-break-after: always;
-  break-after: page;
+  column-gap: var(--badge-col-gap, 8mm);
+  row-gap: var(--badge-row-gap, 10mm);
+  zoom: var(--print-zoom, 0.90);
+  transition: zoom 0.15s ease;
 }
 
 /* The Exam Badge Card */
@@ -253,13 +262,13 @@ body {
 /* PRINT MEDIA STYLES - PIXEL PERFECT FOR A4 */
 @page {
   size: A4 portrait;
-  margin: 0mm;
+  margin: 0;
 }
 
 @media print {
   html, body {
-    width: 210mm !important;
-    height: 297mm !important;
+    width: 100% !important;
+    height: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
     background: transparent !important;
@@ -277,43 +286,63 @@ body {
     padding: 0 !important;
     margin: 0 !important;
     background: transparent !important;
+    display: block !important;
+    width: 100% !important;
   }
 
   .preview-wrapper {
     padding: 0 !important;
     margin: 0 !important;
     overflow: visible !important;
+    display: block !important;
+    width: 100% !important;
   }
 
   .preview-container {
     transform: none !important;
+    display: block !important;
+    width: 100% !important;
   }
 
   .a4-sheet {
-    width: 210mm !important;
-    height: 297mm !important;
-    max-height: 297mm !important;
-    margin: 0 !important;
-    padding: 8mm 6mm !important;
+    width: 100% !important;
+    max-width: 210mm !important;
+    height: 100vh !important;
+    max-height: 290mm !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
     box-shadow: none !important;
-    page-break-after: always !important;
-    break-after: page !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overflow: hidden !important;
+    background: #ffffff !important;
     page-break-inside: avoid !important;
     break-inside: avoid !important;
-    box-sizing: border-box !important;
-    display: grid !important;
-    grid-template-columns: repeat(2, 94mm) !important;
-    grid-template-rows: repeat(2, 134mm) !important;
-    justify-content: center !important;
-    align-content: center !important;
-    column-gap: 8mm !important;
-    row-gap: 10mm !important;
-    background: #ffffff !important;
+  }
+
+  .a4-sheet:not(:last-child) {
+    page-break-after: always !important;
+    break-after: page !important;
   }
 
   .a4-sheet:last-child {
     page-break-after: auto !important;
     break-after: auto !important;
+  }
+
+  .a4-sheet-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 94mm) !important;
+    grid-template-rows: repeat(2, 134mm) !important;
+    column-gap: var(--badge-col-gap, 8mm) !important;
+    row-gap: var(--badge-row-gap, 10mm) !important;
+    justify-content: center !important;
+    align-content: center !important;
+    zoom: var(--print-zoom, 0.90) !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 
   .exam-badge {
