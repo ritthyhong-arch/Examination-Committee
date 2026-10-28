@@ -55,6 +55,9 @@ const INITIAL_STATE = {
     centerGap: 2.5,       // in mm (gap between session and center name)
     yearGap: 3,           // in mm (gap between location and academic year)
     footerBottom: 6.5,    // in mm (bottom space/lift for footer)
+    bgUrl: null,          // Background image URL/DataURL
+    bgOpacity: 25,        // in percent (5-100)
+    bgFit: 'cover',       // 'cover', 'contain', 'center'
     printScale: 90,       // in percentage (75% to 105%), default 90% gives ~17mm side margins
     cardColGap: 8,        // in mm (horizontal gap between cards)
     cardRowGap: 10,       // in mm (vertical gap between cards)
@@ -115,6 +118,9 @@ class BadgeApp {
         if (parsed.examInfo.centerGap === undefined) parsed.examInfo.centerGap = 2.5;
         if (parsed.examInfo.yearGap === undefined) parsed.examInfo.yearGap = 3;
         if (parsed.examInfo.footerBottom === undefined) parsed.examInfo.footerBottom = 6.5;
+        if (parsed.examInfo.bgUrl === undefined) parsed.examInfo.bgUrl = null;
+        if (parsed.examInfo.bgOpacity === undefined) parsed.examInfo.bgOpacity = 25;
+        if (parsed.examInfo.bgFit === undefined) parsed.examInfo.bgFit = 'cover';
         if (parsed.examInfo.printScale === undefined || parsed.examInfo.printScale > 92) parsed.examInfo.printScale = 90;
         if (parsed.examInfo.cardColGap === undefined) parsed.examInfo.cardColGap = 8;
         if (parsed.examInfo.cardRowGap === undefined) parsed.examInfo.cardRowGap = 10;
@@ -190,6 +196,16 @@ class BadgeApp {
     this.logoPreview = document.getElementById('logoPreview');
     this.dividerFileInput = document.getElementById('fileDivider');
 
+    // Background Controls
+    this.bgFileInput = document.getElementById('fileBg');
+    this.bgPreview = document.getElementById('bgPreview');
+    this.bgPlaceholderIcon = document.getElementById('bgPlaceholderIcon');
+    this.bgOpacityInput = document.getElementById('inputBgOpacity');
+    this.bgOpacityVal = document.getElementById('valBgOpacity');
+    this.bgFitSelect = document.getElementById('selectBgFit');
+    this.btnRemoveBg = document.getElementById('btnRemoveBg');
+    this.groupBgSettings = document.getElementById('groupBgSettings');
+
     // Containers
     this.rolesListContainer = document.getElementById('rolesListContainer');
     this.membersTableBody = document.getElementById('membersTableBody');
@@ -252,6 +268,23 @@ class BadgeApp {
       this.toggleModeSections(info.mode || 'roles');
     }
     if (this.logoPreview && info.logoUrl) this.logoPreview.src = info.logoUrl;
+    if (this.bgPreview) {
+      if (info.bgUrl) {
+        this.bgPreview.src = info.bgUrl;
+        this.bgPreview.style.display = 'block';
+        if (this.bgPlaceholderIcon) this.bgPlaceholderIcon.style.display = 'none';
+        if (this.btnRemoveBg) this.btnRemoveBg.style.display = 'inline-flex';
+        if (this.groupBgSettings) this.groupBgSettings.style.display = 'block';
+      } else {
+        this.bgPreview.style.display = 'none';
+        if (this.bgPlaceholderIcon) this.bgPlaceholderIcon.style.display = 'block';
+        if (this.btnRemoveBg) this.btnRemoveBg.style.display = 'none';
+        if (this.groupBgSettings) this.groupBgSettings.style.display = 'none';
+      }
+    }
+    if (this.bgOpacityInput) this.bgOpacityInput.value = info.bgOpacity !== undefined ? info.bgOpacity : 25;
+    if (this.bgOpacityVal) this.bgOpacityVal.innerText = (info.bgOpacity !== undefined ? info.bgOpacity : 25) + ' %';
+    if (this.bgFitSelect) this.bgFitSelect.value = info.bgFit || 'cover';
     if (this.zoomSelect) this.zoomSelect.value = this.state.ui.zoom;
     this.updateScaleDisplays();
   }
@@ -556,6 +589,50 @@ class BadgeApp {
           this.renderBadgesOnly();
         };
         reader.readAsDataURL(file);
+      });
+    }
+
+    // Background Upload
+    if (this.bgFileInput) {
+      this.bgFileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          this.state.examInfo.bgUrl = evt.target.result;
+          this.populateInputs();
+          this.saveState();
+          this.renderBadgesOnly();
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    if (this.btnRemoveBg) {
+      this.btnRemoveBg.addEventListener('click', () => {
+        this.state.examInfo.bgUrl = null;
+        if (this.bgFileInput) this.bgFileInput.value = '';
+        this.populateInputs();
+        this.saveState();
+        this.renderBadgesOnly();
+      });
+    }
+
+    if (this.bgOpacityInput) {
+      this.bgOpacityInput.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value, 10) || 25;
+        this.state.examInfo.bgOpacity = val;
+        if (this.bgOpacityVal) this.bgOpacityVal.innerText = val + ' %';
+        this.saveState();
+        this.renderBadgesOnly();
+      });
+    }
+
+    if (this.bgFitSelect) {
+      this.bgFitSelect.addEventListener('change', (e) => {
+        this.state.examInfo.bgFit = e.target.value;
+        this.saveState();
+        this.renderBadgesOnly();
       });
     }
 
@@ -1070,8 +1147,26 @@ class BadgeApp {
       centerHtml = `<div class="badge-exam-center" style="font-size: ${info.centerFontSize || 9.5}pt;">${info.centerName}</div>`;
     }
 
+    // Background Overlay HTML
+    let bgOverlayHtml = '';
+    if (info.bgUrl) {
+      let bgSizeVal = 'cover';
+      if (info.bgFit === 'contain') bgSizeVal = 'contain';
+      else if (info.bgFit === 'center') bgSizeVal = '60%';
+      else bgSizeVal = 'cover';
+
+      bgOverlayHtml = `
+        <div class="badge-bg-overlay" style="
+          background-image: url('${info.bgUrl}');
+          background-size: ${bgSizeVal};
+          opacity: ${(info.bgOpacity !== undefined ? info.bgOpacity : 25) / 100};
+        "></div>
+      `;
+    }
+
     badgeEl.innerHTML = `
       <div class="exam-badge-inner" style="padding-bottom: ${info.footerBottom !== undefined ? info.footerBottom : 6.5}mm;">
+        ${bgOverlayHtml}
         <!-- Top Section: Logo, Title, Session -->
         <div class="badge-header">
           ${info.logoUrl ? `<img src="${info.logoUrl}" alt="Logo" class="badge-logo" style="height: ${info.logoSize || 28}mm;">` : ''}
