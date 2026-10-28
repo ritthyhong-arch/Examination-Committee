@@ -24,11 +24,15 @@ if %errorlevel% equ 0 (
     echo ========================================================
     echo   [ចំណាំ / NOTICE]
     echo   ប្រសិនបើមិនទាន់បានបង្កើត Repository នៅលើ GitHub ៖
-    echo   1. សូមចូលទៅ https://github.com/new
-    echo   2. ដាក់ឈ្មោះ Repository Name: Examination-Committee
-    echo   3. ជ្រើសរើស Public រួចចុច "Create repository"
-    echo   4. រួចហើយចុចដំណើរការ Push to GitHub.bat នេះម្តងទៀត។
+    echo   1. កម្មវិធីនឹងបើកទំព័របង្កើត Repository លើ Browser ដោយស្វ័យប្រវត្តិ
+    echo   2. សូមចុចប៊ូតុងពណ៌បៃតង "Create repository"
+    echo   3. រួចហើយចុច Enter ដើម្បីសាកល្បង Push ម្តងទៀត...
     echo ========================================================
+    start https://github.com/new?name=Examination-Committee^&description=Examination+Committee+Badge+Generator^&public=true
+    echo.
+    pause
+    echo កំពុងសាកល្បង Push ម្តងទៀត...
+    git push -u origin main
 )
 echo.
 pause
