@@ -47,6 +47,10 @@ const INITIAL_STATE = {
     logoSize: 28,         // in mm
     roleFontSize: 22,     // in pt
     titleFontSize: 13,    // in pt
+    sessionFontSize: 10,  // in pt (សម័យប្រឡង)
+    centerFontSize: 9.5,  // in pt (ឈ្មោះសាលា/មណ្ឌល)
+    yearFontSize: 10,     // in pt (ឆ្នាំសិក្សា)
+    locationFontSize: 15.5, // in pt (រាជធានី/ខេត្ត)
     sessionGap: 3.5,      // in mm (gap from title to session)
     centerGap: 2.5,       // in mm (gap between session and center name)
     yearGap: 3,           // in mm (gap between location and academic year)
@@ -103,6 +107,10 @@ class BadgeApp {
         if (!parsed.examInfo.logoSize) parsed.examInfo.logoSize = 28;
         if (!parsed.examInfo.roleFontSize) parsed.examInfo.roleFontSize = 22;
         if (!parsed.examInfo.titleFontSize) parsed.examInfo.titleFontSize = 13;
+        if (parsed.examInfo.sessionFontSize === undefined) parsed.examInfo.sessionFontSize = 10;
+        if (parsed.examInfo.centerFontSize === undefined) parsed.examInfo.centerFontSize = 9.5;
+        if (parsed.examInfo.yearFontSize === undefined) parsed.examInfo.yearFontSize = 10;
+        if (parsed.examInfo.locationFontSize === undefined) parsed.examInfo.locationFontSize = 15.5;
         if (parsed.examInfo.sessionGap === undefined) parsed.examInfo.sessionGap = 3.5;
         if (parsed.examInfo.centerGap === undefined) parsed.examInfo.centerGap = 2.5;
         if (parsed.examInfo.yearGap === undefined) parsed.examInfo.yearGap = 3;
@@ -146,6 +154,14 @@ class BadgeApp {
     this.roleFontSizeVal = document.getElementById('valRoleFontSize');
     this.titleFontSizeInput = document.getElementById('inputTitleFontSize');
     this.titleFontSizeVal = document.getElementById('valTitleFontSize');
+    this.sessionFontSizeInput = document.getElementById('inputSessionFontSize');
+    this.sessionFontSizeVal = document.getElementById('valSessionFontSize');
+    this.centerFontSizeInput = document.getElementById('inputCenterFontSize');
+    this.centerFontSizeVal = document.getElementById('valCenterFontSize');
+    this.yearFontSizeInput = document.getElementById('inputYearFontSize');
+    this.yearFontSizeVal = document.getElementById('valYearFontSize');
+    this.locationFontSizeInput = document.getElementById('inputLocationFontSize');
+    this.locationFontSizeVal = document.getElementById('valLocationFontSize');
     this.sessionGapInput = document.getElementById('inputSessionGap');
     this.sessionGapVal = document.getElementById('valSessionGap');
     this.centerGapInput = document.getElementById('inputCenterGap');
@@ -208,6 +224,14 @@ class BadgeApp {
     if (this.roleFontSizeVal) this.roleFontSizeVal.innerText = (info.roleFontSize || 22) + ' pt';
     if (this.titleFontSizeInput) this.titleFontSizeInput.value = info.titleFontSize || 13;
     if (this.titleFontSizeVal) this.titleFontSizeVal.innerText = (info.titleFontSize || 13) + ' pt';
+    if (this.sessionFontSizeInput) this.sessionFontSizeInput.value = info.sessionFontSize || 10;
+    if (this.sessionFontSizeVal) this.sessionFontSizeVal.innerText = (info.sessionFontSize || 10) + ' pt';
+    if (this.centerFontSizeInput) this.centerFontSizeInput.value = info.centerFontSize || 9.5;
+    if (this.centerFontSizeVal) this.centerFontSizeVal.innerText = (info.centerFontSize || 9.5) + ' pt';
+    if (this.yearFontSizeInput) this.yearFontSizeInput.value = info.yearFontSize || 10;
+    if (this.yearFontSizeVal) this.yearFontSizeVal.innerText = (info.yearFontSize || 10) + ' pt';
+    if (this.locationFontSizeInput) this.locationFontSizeInput.value = info.locationFontSize || 15.5;
+    if (this.locationFontSizeVal) this.locationFontSizeVal.innerText = (info.locationFontSize || 15.5) + ' pt';
     if (this.sessionGapInput) this.sessionGapInput.value = info.sessionGap !== undefined ? info.sessionGap : 3.5;
     if (this.sessionGapVal) this.sessionGapVal.innerText = (info.sessionGap !== undefined ? info.sessionGap : 3.5) + ' mm';
     if (this.centerGapInput) this.centerGapInput.value = info.centerGap !== undefined ? info.centerGap : 2.5;
@@ -379,6 +403,46 @@ class BadgeApp {
         const val = parseFloat(e.target.value) || 13;
         this.state.examInfo.titleFontSize = val;
         if (this.titleFontSizeVal) this.titleFontSizeVal.innerText = val + ' pt';
+        this.saveState();
+        this.renderBadgesOnly();
+      });
+    }
+
+    if (this.sessionFontSizeInput) {
+      this.sessionFontSizeInput.addEventListener('input', (e) => {
+        const val = parseFloat(e.target.value) || 10;
+        this.state.examInfo.sessionFontSize = val;
+        if (this.sessionFontSizeVal) this.sessionFontSizeVal.innerText = val + ' pt';
+        this.saveState();
+        this.renderBadgesOnly();
+      });
+    }
+
+    if (this.centerFontSizeInput) {
+      this.centerFontSizeInput.addEventListener('input', (e) => {
+        const val = parseFloat(e.target.value) || 9.5;
+        this.state.examInfo.centerFontSize = val;
+        if (this.centerFontSizeVal) this.centerFontSizeVal.innerText = val + ' pt';
+        this.saveState();
+        this.renderBadgesOnly();
+      });
+    }
+
+    if (this.yearFontSizeInput) {
+      this.yearFontSizeInput.addEventListener('input', (e) => {
+        const val = parseFloat(e.target.value) || 10;
+        this.state.examInfo.yearFontSize = val;
+        if (this.yearFontSizeVal) this.yearFontSizeVal.innerText = val + ' pt';
+        this.saveState();
+        this.renderBadgesOnly();
+      });
+    }
+
+    if (this.locationFontSizeInput) {
+      this.locationFontSizeInput.addEventListener('input', (e) => {
+        const val = parseFloat(e.target.value) || 15.5;
+        this.state.examInfo.locationFontSize = val;
+        if (this.locationFontSizeVal) this.locationFontSizeVal.innerText = val + ' pt';
         this.saveState();
         this.renderBadgesOnly();
       });
@@ -1003,7 +1067,7 @@ class BadgeApp {
     // Center Info HTML
     let centerHtml = '';
     if (info.showCenter && info.centerName) {
-      centerHtml = `<div class="badge-exam-center">${info.centerName}</div>`;
+      centerHtml = `<div class="badge-exam-center" style="font-size: ${info.centerFontSize || 9.5}pt;">${info.centerName}</div>`;
     }
 
     badgeEl.innerHTML = `
@@ -1012,7 +1076,7 @@ class BadgeApp {
         <div class="badge-header">
           ${info.logoUrl ? `<img src="${info.logoUrl}" alt="Logo" class="badge-logo" style="height: ${info.logoSize || 28}mm;">` : ''}
           <h2 class="badge-exam-title" style="font-size: ${info.titleFontSize || 13}pt; margin-bottom: ${info.sessionGap !== undefined ? info.sessionGap : 3.5}mm;">${info.examTitle || 'ប្រឡងជ្រើសរើសសិស្សពូកែ'}</h2>
-          <div class="badge-exam-session" style="${info.showCenter && info.centerName ? `margin-bottom: ${info.centerGap !== undefined ? info.centerGap : 2.5}mm;` : ''}">${info.examSession || 'សម័យប្រឡង ៖ ២១ កញ្ញា ២០២៦'}</div>
+          <div class="badge-exam-session" style="font-size: ${info.sessionFontSize || 10}pt; ${info.showCenter && info.centerName ? `margin-bottom: ${info.centerGap !== undefined ? info.centerGap : 2.5}mm;` : ''}">${info.examSession || 'សម័យប្រឡង ៖ ២១ កញ្ញា ២០២៦'}</div>
           ${centerHtml}
         </div>
 
@@ -1026,10 +1090,10 @@ class BadgeApp {
 
         <!-- Bottom Section: Location, Academic Year, Divider -->
         <div class="badge-footer">
-          <div class="badge-location" style="color: ${info.locationColor || '#c81d1a'}; margin-bottom: ${info.yearGap !== undefined ? info.yearGap : 3}mm;">
+          <div class="badge-location" style="font-size: ${info.locationFontSize || 15.5}pt; color: ${info.locationColor || '#c81d1a'}; margin-bottom: ${info.yearGap !== undefined ? info.yearGap : 3}mm;">
             ${info.location || 'រាជធានីភ្នំពេញ'}
           </div>
-          <div class="badge-academic-year">
+          <div class="badge-academic-year" style="font-size: ${info.yearFontSize || 10}pt;">
             ${info.academicYear || 'ឆ្នាំសិក្សា ២០២៦-២០២៧'}
           </div>
           ${dividerHtml}
