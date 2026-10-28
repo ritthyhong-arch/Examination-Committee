@@ -2,6 +2,8 @@
 
 ប្រព័ន្ធគេហទំព័រសម្រាប់បង្កើត និងបោះពុម្ពស្លាកសញ្ញាគណៈកម្មការដំណើរការប្រឡង (ដូចជារូបភាពគំរូផ្លូវការ) លើទំហំក្រដាស A4 ស្តង់ដារ (៤ ស្លាកក្នុងមួយសន្លឹក)។
 
+🔗 **តំណភ្ជាប់ Online ៖** [https://ritthyhong-arch.github.io/Examination-Committee/](https://ritthyhong-arch.github.io/Examination-Committee/)
+
 ![គំរូស្លាកសញ្ញា](assets/sample.png)
 
 ---
