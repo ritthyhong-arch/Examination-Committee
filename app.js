@@ -801,8 +801,11 @@ class BadgeApp {
     if (type === 'outstanding') {
       this.state.examInfo.examTitle = 'ប្រឡងជ្រើសរើសសិស្សពូកែ';
       this.state.examInfo.location = 'រាជធានីភ្នំពេញ';
-    } else if (type === 'bacii') {
-      this.state.examInfo.examTitle = 'ប្រឡងសញ្ញាបត្រមធ្យមសិក្សាទុតិយភូមិ';
+    } else if (type === 'mock1' || type === 'bacii') {
+      this.state.examInfo.examTitle = 'ប្រឡងសាកល្បងលើកទី១';
+      this.state.examInfo.location = 'រាជធានីភ្នំពេញ';
+    } else if (type === 'mock2') {
+      this.state.examInfo.examTitle = 'ប្រឡងសាកល្បងលើកទី២';
       this.state.examInfo.location = 'រាជធានីភ្នំពេញ';
     } else if (type === 'brevet') {
       this.state.examInfo.examTitle = 'ប្រឡងសញ្ញាបត្រមធ្យមសិក្សាបឋមភូមិ';
