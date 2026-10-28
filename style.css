@@ -120,9 +120,9 @@ body {
 .badge-exam-title {
   font-family: 'Moul', 'Khmer OS Muol Light', serif;
   font-size: 13pt;
-  line-height: 1.35;
+  line-height: 1.4;
   color: #111111;
-  margin: 0 0 1.5mm 0;
+  margin: 0 0 3.5mm 0;
   text-align: center;
   word-break: break-word;
 }
@@ -131,18 +131,18 @@ body {
   font-family: 'Kantumruy Pro', 'Khmer OS Bokor', 'Siemreap', sans-serif;
   font-weight: 600;
   font-size: 10pt;
-  line-height: 1.25;
+  line-height: 1.5;
   color: #1a1a1a;
-  margin: 0;
+  margin: 0 0 2.5mm 0;
 }
 
 .badge-exam-center {
   font-family: 'Kantumruy Pro', 'Khmer OS Battambang', sans-serif;
   font-weight: 600;
   font-size: 9.5pt;
-  line-height: 1.25;
+  line-height: 1.5;
   color: #334155;
-  margin-top: 1.5mm;
+  margin: 0;
 }
 
 /* Role / Center Title Section */

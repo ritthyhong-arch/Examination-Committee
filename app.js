@@ -47,6 +47,8 @@ const INITIAL_STATE = {
     logoSize: 28,         // in mm
     roleFontSize: 22,     // in pt
     titleFontSize: 13,    // in pt
+    sessionGap: 3.5,      // in mm (gap from title to session)
+    centerGap: 2.5,       // in mm (gap between session and center name)
     showCutMarks: false,
     mode: 'roles'         // 'roles' or 'members'
   },
@@ -96,6 +98,8 @@ class BadgeApp {
         if (!parsed.examInfo.logoSize) parsed.examInfo.logoSize = 28;
         if (!parsed.examInfo.roleFontSize) parsed.examInfo.roleFontSize = 22;
         if (!parsed.examInfo.titleFontSize) parsed.examInfo.titleFontSize = 13;
+        if (parsed.examInfo.sessionGap === undefined) parsed.examInfo.sessionGap = 3.5;
+        if (parsed.examInfo.centerGap === undefined) parsed.examInfo.centerGap = 2.5;
         return parsed;
       }
     } catch (e) {
@@ -132,6 +136,10 @@ class BadgeApp {
     this.roleFontSizeVal = document.getElementById('valRoleFontSize');
     this.titleFontSizeInput = document.getElementById('inputTitleFontSize');
     this.titleFontSizeVal = document.getElementById('valTitleFontSize');
+    this.sessionGapInput = document.getElementById('inputSessionGap');
+    this.sessionGapVal = document.getElementById('valSessionGap');
+    this.centerGapInput = document.getElementById('inputCenterGap');
+    this.centerGapVal = document.getElementById('valCenterGap');
     this.showCutMarksCheckbox = document.getElementById('checkboxShowCutMarks');
     this.dividerTypeSelect = document.getElementById('selectDividerType');
     this.groupCustomDivider = document.getElementById('groupCustomDivider');
@@ -178,6 +186,10 @@ class BadgeApp {
     if (this.roleFontSizeVal) this.roleFontSizeVal.innerText = (info.roleFontSize || 22) + ' pt';
     if (this.titleFontSizeInput) this.titleFontSizeInput.value = info.titleFontSize || 13;
     if (this.titleFontSizeVal) this.titleFontSizeVal.innerText = (info.titleFontSize || 13) + ' pt';
+    if (this.sessionGapInput) this.sessionGapInput.value = info.sessionGap !== undefined ? info.sessionGap : 3.5;
+    if (this.sessionGapVal) this.sessionGapVal.innerText = (info.sessionGap !== undefined ? info.sessionGap : 3.5) + ' mm';
+    if (this.centerGapInput) this.centerGapInput.value = info.centerGap !== undefined ? info.centerGap : 2.5;
+    if (this.centerGapVal) this.centerGapVal.innerText = (info.centerGap !== undefined ? info.centerGap : 2.5) + ' mm';
     if (this.showCutMarksCheckbox) this.showCutMarksCheckbox.checked = !!info.showCutMarks;
     if (this.dividerTypeSelect) {
       this.dividerTypeSelect.value = info.dividerType || 'image';
@@ -277,6 +289,26 @@ class BadgeApp {
         const val = parseFloat(e.target.value) || 13;
         this.state.examInfo.titleFontSize = val;
         if (this.titleFontSizeVal) this.titleFontSizeVal.innerText = val + ' pt';
+        this.saveState();
+        this.renderBadgesOnly();
+      });
+    }
+
+    if (this.sessionGapInput) {
+      this.sessionGapInput.addEventListener('input', (e) => {
+        const val = parseFloat(e.target.value) || 3.5;
+        this.state.examInfo.sessionGap = val;
+        if (this.sessionGapVal) this.sessionGapVal.innerText = val + ' mm';
+        this.saveState();
+        this.renderBadgesOnly();
+      });
+    }
+
+    if (this.centerGapInput) {
+      this.centerGapInput.addEventListener('input', (e) => {
+        const val = parseFloat(e.target.value) || 2.5;
+        this.state.examInfo.centerGap = val;
+        if (this.centerGapVal) this.centerGapVal.innerText = val + ' mm';
         this.saveState();
         this.renderBadgesOnly();
       });
@@ -808,8 +840,8 @@ class BadgeApp {
         <!-- Top Section: Logo, Title, Session -->
         <div class="badge-header">
           ${info.logoUrl ? `<img src="${info.logoUrl}" alt="Logo" class="badge-logo" style="height: ${info.logoSize || 28}mm;">` : ''}
-          <h2 class="badge-exam-title" style="font-size: ${info.titleFontSize || 13}pt;">${info.examTitle || 'ប្រឡងជ្រើសរើសសិស្សពូកែ'}</h2>
-          <div class="badge-exam-session">${info.examSession || 'សម័យប្រឡង ៖ ២១ កញ្ញា ២០២៦'}</div>
+          <h2 class="badge-exam-title" style="font-size: ${info.titleFontSize || 13}pt; margin-bottom: ${info.sessionGap !== undefined ? info.sessionGap : 3.5}mm;">${info.examTitle || 'ប្រឡងជ្រើសរើសសិស្សពូកែ'}</h2>
+          <div class="badge-exam-session" style="${info.showCenter && info.centerName ? `margin-bottom: ${info.centerGap !== undefined ? info.centerGap : 2.5}mm;` : ''}">${info.examSession || 'សម័យប្រឡង ៖ ២១ កញ្ញា ២០២៦'}</div>
           ${centerHtml}
         </div>
 
