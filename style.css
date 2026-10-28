@@ -92,7 +92,7 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  padding: 5mm 4mm 4mm 4mm;
+  padding: 5mm 4mm 6.5mm 4mm;
   text-align: center;
   background-color: #ffffff;
   width: 100%;
@@ -190,23 +190,24 @@ body {
   align-items: center;
   width: 100%;
   flex-shrink: 0;
+  margin-bottom: 1.5mm;
 }
 
 .badge-location {
   font-family: 'Moul', 'Khmer OS Muol Light', serif;
   font-size: 15.5pt;
-  line-height: 1.25;
+  line-height: 1.4;
   color: #c81d1a;
-  margin: 0 0 1.5mm 0;
+  margin: 0 0 3mm 0;
 }
 
 .badge-academic-year {
   font-family: 'Kantumruy Pro', 'Battambang', sans-serif;
   font-weight: 600;
   font-size: 10pt;
-  line-height: 1.2;
+  line-height: 1.4;
   color: #1a1a1a;
-  margin: 0 0 1.5mm 0;
+  margin: 0 0 2mm 0;
 }
 
 .badge-divider-img {
@@ -215,8 +216,8 @@ body {
   max-height: 5mm;
   object-fit: contain;
   display: block;
-  margin-top: 0.5mm;
-  margin-bottom: 1mm;
+  margin-top: 1mm;
+  margin-bottom: 0.5mm;
 }
 
 /* Crop Marks / Cut Lines */

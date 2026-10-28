@@ -49,6 +49,8 @@ const INITIAL_STATE = {
     titleFontSize: 13,    // in pt
     sessionGap: 3.5,      // in mm (gap from title to session)
     centerGap: 2.5,       // in mm (gap between session and center name)
+    yearGap: 3,           // in mm (gap between location and academic year)
+    footerBottom: 6.5,    // in mm (bottom space/lift for footer)
     showCutMarks: false,
     mode: 'roles'         // 'roles' or 'members'
   },
@@ -100,6 +102,8 @@ class BadgeApp {
         if (!parsed.examInfo.titleFontSize) parsed.examInfo.titleFontSize = 13;
         if (parsed.examInfo.sessionGap === undefined) parsed.examInfo.sessionGap = 3.5;
         if (parsed.examInfo.centerGap === undefined) parsed.examInfo.centerGap = 2.5;
+        if (parsed.examInfo.yearGap === undefined) parsed.examInfo.yearGap = 3;
+        if (parsed.examInfo.footerBottom === undefined) parsed.examInfo.footerBottom = 6.5;
         return parsed;
       }
     } catch (e) {
@@ -140,6 +144,10 @@ class BadgeApp {
     this.sessionGapVal = document.getElementById('valSessionGap');
     this.centerGapInput = document.getElementById('inputCenterGap');
     this.centerGapVal = document.getElementById('valCenterGap');
+    this.yearGapInput = document.getElementById('inputYearGap');
+    this.yearGapVal = document.getElementById('valYearGap');
+    this.footerBottomInput = document.getElementById('inputFooterBottom');
+    this.footerBottomVal = document.getElementById('valFooterBottom');
     this.showCutMarksCheckbox = document.getElementById('checkboxShowCutMarks');
     this.dividerTypeSelect = document.getElementById('selectDividerType');
     this.groupCustomDivider = document.getElementById('groupCustomDivider');
@@ -190,6 +198,10 @@ class BadgeApp {
     if (this.sessionGapVal) this.sessionGapVal.innerText = (info.sessionGap !== undefined ? info.sessionGap : 3.5) + ' mm';
     if (this.centerGapInput) this.centerGapInput.value = info.centerGap !== undefined ? info.centerGap : 2.5;
     if (this.centerGapVal) this.centerGapVal.innerText = (info.centerGap !== undefined ? info.centerGap : 2.5) + ' mm';
+    if (this.yearGapInput) this.yearGapInput.value = info.yearGap !== undefined ? info.yearGap : 3;
+    if (this.yearGapVal) this.yearGapVal.innerText = (info.yearGap !== undefined ? info.yearGap : 3) + ' mm';
+    if (this.footerBottomInput) this.footerBottomInput.value = info.footerBottom !== undefined ? info.footerBottom : 6.5;
+    if (this.footerBottomVal) this.footerBottomVal.innerText = (info.footerBottom !== undefined ? info.footerBottom : 6.5) + ' mm';
     if (this.showCutMarksCheckbox) this.showCutMarksCheckbox.checked = !!info.showCutMarks;
     if (this.dividerTypeSelect) {
       this.dividerTypeSelect.value = info.dividerType || 'image';
@@ -309,6 +321,26 @@ class BadgeApp {
         const val = parseFloat(e.target.value) || 2.5;
         this.state.examInfo.centerGap = val;
         if (this.centerGapVal) this.centerGapVal.innerText = val + ' mm';
+        this.saveState();
+        this.renderBadgesOnly();
+      });
+    }
+
+    if (this.yearGapInput) {
+      this.yearGapInput.addEventListener('input', (e) => {
+        const val = parseFloat(e.target.value) || 3;
+        this.state.examInfo.yearGap = val;
+        if (this.yearGapVal) this.yearGapVal.innerText = val + ' mm';
+        this.saveState();
+        this.renderBadgesOnly();
+      });
+    }
+
+    if (this.footerBottomInput) {
+      this.footerBottomInput.addEventListener('input', (e) => {
+        const val = parseFloat(e.target.value) || 6.5;
+        this.state.examInfo.footerBottom = val;
+        if (this.footerBottomVal) this.footerBottomVal.innerText = val + ' mm';
         this.saveState();
         this.renderBadgesOnly();
       });
@@ -836,7 +868,7 @@ class BadgeApp {
     }
 
     badgeEl.innerHTML = `
-      <div class="exam-badge-inner">
+      <div class="exam-badge-inner" style="padding-bottom: ${info.footerBottom !== undefined ? info.footerBottom : 6.5}mm;">
         <!-- Top Section: Logo, Title, Session -->
         <div class="badge-header">
           ${info.logoUrl ? `<img src="${info.logoUrl}" alt="Logo" class="badge-logo" style="height: ${info.logoSize || 28}mm;">` : ''}
@@ -855,7 +887,7 @@ class BadgeApp {
 
         <!-- Bottom Section: Location, Academic Year, Divider -->
         <div class="badge-footer">
-          <div class="badge-location" style="color: ${info.locationColor || '#c81d1a'};">
+          <div class="badge-location" style="color: ${info.locationColor || '#c81d1a'}; margin-bottom: ${info.yearGap !== undefined ? info.yearGap : 3}mm;">
             ${info.location || 'រាជធានីភ្នំពេញ'}
           </div>
           <div class="badge-academic-year">
