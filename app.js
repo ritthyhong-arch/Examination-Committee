@@ -44,6 +44,9 @@ const INITIAL_STATE = {
     dividerType: 'image', // 'image', 'svg', 'none'
     borderWidth: 6.5,     // in mm
     borderRadius: 3,      // in mm
+    logoSize: 28,         // in mm
+    roleFontSize: 22,     // in pt
+    titleFontSize: 13,    // in pt
     showCutMarks: false,
     mode: 'roles'         // 'roles' or 'members'
   },
@@ -90,6 +93,9 @@ class BadgeApp {
         if (!parsed.examInfo.dividerUrl && typeof DEFAULT_ASSETS !== 'undefined') {
           parsed.examInfo.dividerUrl = DEFAULT_ASSETS.divider;
         }
+        if (!parsed.examInfo.logoSize) parsed.examInfo.logoSize = 28;
+        if (!parsed.examInfo.roleFontSize) parsed.examInfo.roleFontSize = 22;
+        if (!parsed.examInfo.titleFontSize) parsed.examInfo.titleFontSize = 13;
         return parsed;
       }
     } catch (e) {
@@ -120,6 +126,12 @@ class BadgeApp {
     this.borderWidthVal = document.getElementById('valBorderWidth');
     this.borderRadiusInput = document.getElementById('inputBorderRadius');
     this.borderRadiusVal = document.getElementById('valBorderRadius');
+    this.logoSizeInput = document.getElementById('inputLogoSize');
+    this.logoSizeVal = document.getElementById('valLogoSize');
+    this.roleFontSizeInput = document.getElementById('inputRoleFontSize');
+    this.roleFontSizeVal = document.getElementById('valRoleFontSize');
+    this.titleFontSizeInput = document.getElementById('inputTitleFontSize');
+    this.titleFontSizeVal = document.getElementById('valTitleFontSize');
     this.showCutMarksCheckbox = document.getElementById('checkboxShowCutMarks');
     this.dividerTypeSelect = document.getElementById('selectDividerType');
     this.groupCustomDivider = document.getElementById('groupCustomDivider');
@@ -160,6 +172,12 @@ class BadgeApp {
     if (this.borderWidthVal) this.borderWidthVal.innerText = (info.borderWidth || 6.5) + ' mm';
     if (this.borderRadiusInput) this.borderRadiusInput.value = info.borderRadius || 3;
     if (this.borderRadiusVal) this.borderRadiusVal.innerText = (info.borderRadius || 3) + ' mm';
+    if (this.logoSizeInput) this.logoSizeInput.value = info.logoSize || 28;
+    if (this.logoSizeVal) this.logoSizeVal.innerText = (info.logoSize || 28) + ' mm';
+    if (this.roleFontSizeInput) this.roleFontSizeInput.value = info.roleFontSize || 22;
+    if (this.roleFontSizeVal) this.roleFontSizeVal.innerText = (info.roleFontSize || 22) + ' pt';
+    if (this.titleFontSizeInput) this.titleFontSizeInput.value = info.titleFontSize || 13;
+    if (this.titleFontSizeVal) this.titleFontSizeVal.innerText = (info.titleFontSize || 13) + ' pt';
     if (this.showCutMarksCheckbox) this.showCutMarksCheckbox.checked = !!info.showCutMarks;
     if (this.dividerTypeSelect) {
       this.dividerTypeSelect.value = info.dividerType || 'image';
@@ -231,6 +249,36 @@ class BadgeApp {
         if (this.borderRadiusVal) this.borderRadiusVal.innerText = val + ' mm';
         this.saveState();
         this.updateBadgeStyles();
+      });
+    }
+
+    if (this.logoSizeInput) {
+      this.logoSizeInput.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value, 10) || 28;
+        this.state.examInfo.logoSize = val;
+        if (this.logoSizeVal) this.logoSizeVal.innerText = val + ' mm';
+        this.saveState();
+        this.renderBadgesOnly();
+      });
+    }
+
+    if (this.roleFontSizeInput) {
+      this.roleFontSizeInput.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value, 10) || 22;
+        this.state.examInfo.roleFontSize = val;
+        if (this.roleFontSizeVal) this.roleFontSizeVal.innerText = val + ' pt';
+        this.saveState();
+        this.renderBadgesOnly();
+      });
+    }
+
+    if (this.titleFontSizeInput) {
+      this.titleFontSizeInput.addEventListener('input', (e) => {
+        const val = parseFloat(e.target.value) || 13;
+        this.state.examInfo.titleFontSize = val;
+        if (this.titleFontSizeVal) this.titleFontSizeVal.innerText = val + ' pt';
+        this.saveState();
+        this.renderBadgesOnly();
       });
     }
 
@@ -686,21 +734,37 @@ class BadgeApp {
     badgeEl.style.borderRadius = `${info.borderRadius || 3}mm`;
 
     // Process Role text
-    const formattedRole = (badge.roleName || '')
-      .split('\n')
+    const lines = (badge.roleName || '').split('\n');
+    const formattedRole = lines
       .map(line => `<span class="block">${line}</span>`)
       .join('');
 
-    // Determine Role Font Size based on line length
-    const roleLen = (badge.roleName || '').length;
-    let roleFontSize = '19pt';
-    let roleLineHeight = '1.3';
-    if (roleLen > 24) {
-      roleFontSize = '14pt';
-      roleLineHeight = '1.25';
-    } else if (roleLen > 15) {
-      roleFontSize = '16.5pt';
-      roleLineHeight = '1.3';
+    // Determine Role Font Size based on line length and user's base size
+    const maxLineLen = Math.max(...lines.map(l => l.length));
+    const isMultiLine = lines.length > 1;
+    const baseSize = info.roleFontSize || 22;
+
+    let computedFontSize = baseSize;
+    let roleLineHeight = '1.35';
+
+    if (isMultiLine) {
+      if (maxLineLen > 18) {
+        computedFontSize = Math.max(16, baseSize - 4);
+      } else if (maxLineLen > 12) {
+        computedFontSize = Math.max(18, baseSize - 2);
+      } else {
+        computedFontSize = baseSize;
+      }
+    } else {
+      if (maxLineLen > 24) {
+        computedFontSize = Math.max(16, baseSize - 4);
+      } else if (maxLineLen > 18) {
+        computedFontSize = Math.max(18.5, baseSize - 1.5);
+      } else if (maxLineLen > 14) {
+        computedFontSize = Math.max(20.5, baseSize);
+      } else {
+        computedFontSize = baseSize + 2;
+      }
     }
 
     // Divider HTML
@@ -736,22 +800,22 @@ class BadgeApp {
     // Center Info HTML
     let centerHtml = '';
     if (info.showCenter && info.centerName) {
-      centerHtml = `<div class="font-khmer-subhead text-[8.5pt] text-slate-700 font-semibold mb-1">${info.centerName}</div>`;
+      centerHtml = `<div class="badge-exam-center">${info.centerName}</div>`;
     }
 
     badgeEl.innerHTML = `
       <div class="exam-badge-inner">
         <!-- Top Section: Logo, Title, Session -->
         <div class="badge-header">
-          ${info.logoUrl ? `<img src="${info.logoUrl}" alt="Logo" class="badge-logo">` : ''}
-          <h2 class="badge-exam-title">${info.examTitle || 'ប្រឡងជ្រើសរើសសិស្សពូកែ'}</h2>
+          ${info.logoUrl ? `<img src="${info.logoUrl}" alt="Logo" class="badge-logo" style="height: ${info.logoSize || 28}mm;">` : ''}
+          <h2 class="badge-exam-title" style="font-size: ${info.titleFontSize || 13}pt;">${info.examTitle || 'ប្រឡងជ្រើសរើសសិស្សពូកែ'}</h2>
           <div class="badge-exam-session">${info.examSession || 'សម័យប្រឡង ៖ ២១ កញ្ញា ២០២៦'}</div>
           ${centerHtml}
         </div>
 
         <!-- Middle Section: Role / Committee -->
         <div class="badge-role-container">
-          <h1 class="badge-role-title" style="font-size: ${roleFontSize}; line-height: ${roleLineHeight};">
+          <h1 class="badge-role-title" style="font-size: ${computedFontSize}pt; line-height: ${roleLineHeight};">
             ${formattedRole}
           </h1>
           ${memberHtml}
