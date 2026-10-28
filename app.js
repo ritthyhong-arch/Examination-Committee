@@ -506,9 +506,9 @@ class BadgeApp {
           <input type="color" value="${role.color}" class="w-8 h-8 rounded border border-slate-300 cursor-pointer p-0.5 bg-white" data-action="change-role-color" data-id="${role.id}">
         </div>
 
-        <!-- Role Name Input -->
+        <!-- Role Name Input (Rows 2 for easy 2-line editing) -->
         <div class="flex-1 min-w-0">
-          <textarea rows="1" class="w-full text-xs font-khmer-moul px-2 py-1 bg-white border border-slate-300 rounded focus:ring-1 focus:ring-blue-500 focus:outline-none resize-none" data-action="change-role-name" data-id="${role.id}" title="ចុចដើម្បីកែសម្រួលឈ្មោះតួនាទី">${role.name}</textarea>
+          <textarea rows="2" class="w-full text-xs font-khmer-moul px-2 py-1 bg-white border border-slate-300 rounded focus:ring-1 focus:ring-blue-500 focus:outline-none resize-none leading-relaxed" data-action="change-role-name" data-id="${role.id}" placeholder="ឈ្មោះតួនាទី (កំណត់ត្រឹម ២ ជួរ)" title="ចុចដើម្បីកែសម្រួលឈ្មោះតួនាទី (កំណត់ត្រឹម ២ ជួរ)">${role.name}</textarea>
         </div>
 
         <!-- Quantity Controls -->
@@ -797,39 +797,60 @@ class BadgeApp {
     badgeEl.style.borderWidth = `${info.borderWidth || 6.5}mm`;
     badgeEl.style.borderRadius = `${info.borderRadius || 3}mm`;
 
-    // Process Role text
-    const lines = (badge.roleName || '').split('\n');
-    const formattedRole = lines
-      .map(line => `<span class="block">${line}</span>`)
-      .join('');
+    // Process Role text: Strictly limit to maximum 2 lines (កំណត់ត្រឹម ២ ជួរ)
+    let rawLines = (badge.roleName || '')
+      .split('\n')
+      .map(l => l.trim())
+      .filter(l => l.length > 0);
 
-    // Determine Role Font Size based on line length and user's base size
-    const maxLineLen = Math.max(...lines.map(l => l.length));
-    const isMultiLine = lines.length > 1;
+    // Auto-split single long line if it starts with គណៈកម្មការ and exceeds 14 chars
+    if (rawLines.length === 1 && rawLines[0].length > 14 && rawLines[0].startsWith('គណៈកម្មការ')) {
+      rawLines = ['គណៈកម្មការ', rawLines[0].substring(9).trim()];
+    }
+
+    // Combine any excess lines beyond line 2 into line 2
+    let finalLines = rawLines;
+    if (rawLines.length > 2) {
+      finalLines = [rawLines[0], rawLines.slice(1).join(' ')];
+    } else if (rawLines.length === 0) {
+      finalLines = [''];
+    }
+
+    // Determine Role Font Size so that the longest line fits without overflowing 73mm width
+    const maxLineLen = Math.max(...finalLines.map(l => l.length));
+    const isMultiLine = finalLines.length > 1;
     const baseSize = info.roleFontSize || 22;
 
     let computedFontSize = baseSize;
-    let roleLineHeight = '1.35';
+    let roleLineHeight = isMultiLine ? '1.35' : '1.25';
 
     if (isMultiLine) {
-      if (maxLineLen > 18) {
-        computedFontSize = Math.max(16, baseSize - 4);
+      if (maxLineLen > 22) {
+        computedFontSize = Math.min(baseSize, 14.5);
+      } else if (maxLineLen > 18) {
+        computedFontSize = Math.min(baseSize, 15.5);
+      } else if (maxLineLen > 15) {
+        computedFontSize = Math.min(baseSize, 16.5);
       } else if (maxLineLen > 12) {
-        computedFontSize = Math.max(18, baseSize - 2);
+        computedFontSize = Math.min(baseSize, 19);
       } else {
         computedFontSize = baseSize;
       }
     } else {
-      if (maxLineLen > 24) {
-        computedFontSize = Math.max(16, baseSize - 4);
+      if (maxLineLen > 22) {
+        computedFontSize = Math.min(baseSize, 15.5);
       } else if (maxLineLen > 18) {
-        computedFontSize = Math.max(18.5, baseSize - 1.5);
+        computedFontSize = Math.min(baseSize, 17.5);
       } else if (maxLineLen > 14) {
-        computedFontSize = Math.max(20.5, baseSize);
+        computedFontSize = Math.min(baseSize, 20);
       } else {
         computedFontSize = baseSize + 2;
       }
     }
+
+    const formattedRole = finalLines
+      .map(line => `<span class="badge-role-line">${line}</span>`)
+      .join('');
 
     // Divider HTML
     let dividerHtml = '';
