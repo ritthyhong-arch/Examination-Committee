@@ -32,13 +32,13 @@ const COLOR_PALETTE = [
 // Initial State matching the user uploaded sample
 const INITIAL_STATE = {
   examInfo: {
-    examTitle: 'ប្រឡងជ្រើសរើសសិស្សពូកែ',
-    examSession: 'សម័យប្រឡង ៖ ២១ កញ្ញា ២០២៦',
+    examTitle: 'ប្រឡងសាកល្បងលើកទី១',
+    examSession: 'សម័យប្រឡង ៖ ៧ ធ្នូ ២០២៦',
     location: 'រាជធានីភ្នំពេញ',
     locationColor: '#c81d1a',
     academicYear: 'ឆ្នាំសិក្សា ២០២៦-២០២៧',
-    showCenter: false,
-    centerName: 'វិទ្យាល័យព្រះស៊ីសុវត្ថិ',
+    showCenter: true,
+    centerName: 'សាលាបញ្ញាសាស្ត្រអន្តរជាតិសាខាទី៩',
     logoUrl: (typeof DEFAULT_ASSETS !== 'undefined' && DEFAULT_ASSETS.logo) ? DEFAULT_ASSETS.logo : 'assets/logo.png',
     dividerUrl: (typeof DEFAULT_ASSETS !== 'undefined' && DEFAULT_ASSETS.divider) ? DEFAULT_ASSETS.divider : 'assets/divider.png',
     dividerType: 'image', // 'image', 'svg', 'none'
@@ -65,13 +65,14 @@ const INITIAL_STATE = {
     mode: 'roles'         // 'roles' or 'members'
   },
   roles: [
-    { id: 1, name: 'ប្រធានមណ្ឌល', color: '#d32f2f', qty: 1 },
+    { id: 1, name: 'ប្រធានគណៈមេប្រយោគ', color: '#d32f2f', qty: 1 },
     { id: 2, name: 'អនុប្រធានមណ្ឌល', color: '#d32f2f', qty: 1 },
     { id: 3, name: 'គណៈកម្មការ\nកណ្ដាល', color: '#f5a623', qty: 1 },
     { id: 4, name: 'គណៈកម្មការ\nអប្បមាទ', color: '#00a3e8', qty: 1 },
     { id: 5, name: 'គណៈកម្មការ\nអនុរក្ស', color: '#10b981', qty: 4 },
-    { id: 6, name: 'គណៈកម្មការ\nកែផ្ទៀង', color: '#8b5cf6', qty: 2 },
-    { id: 7, name: 'គណៈកម្មការ\nលេខាធិការ', color: '#f97316', qty: 2 }
+    { id: 6, name: 'គណៈកម្មការ\nសន្តិសុខមណ្ឌលសំណេរ', color: '#475569', qty: 2 },
+    { id: 7, name: 'គណៈកម្មការ\nកែផ្ទៀង', color: '#8b5cf6', qty: 2 },
+    { id: 8, name: 'គណៈកម្មការ\nលេខាធិការ', color: '#f97316', qty: 2 }
   ],
   members: [
     { id: 1, name: 'លោក ស៊ុន វណ្ណា', gender: 'ប្រុស', role: 'ប្រធានមណ្ឌល', color: '#d32f2f', unit: 'វិទ្យាល័យព្រះស៊ីសុវត្ថិ', room: 'ការិយាល័យមណ្ឌល' },
@@ -1224,14 +1225,21 @@ class BadgeApp {
 
   // Load Exam Type Preset
   loadExamPreset(type) {
-    if (type === 'outstanding') {
-      this.state.examInfo.examTitle = 'ប្រឡងជ្រើសរើសសិស្សពូកែ';
-      this.state.examInfo.location = 'រាជធានីភ្នំពេញ';
-    } else if (type === 'mock1' || type === 'bacii') {
+    if (type === 'mock1' || type === 'bacii') {
       this.state.examInfo.examTitle = 'ប្រឡងសាកល្បងលើកទី១';
+      this.state.examInfo.examSession = 'សម័យប្រឡង ៖ ៧ ធ្នូ ២០២៦';
+      this.state.examInfo.showCenter = true;
+      this.state.examInfo.centerName = 'សាលាបញ្ញាសាស្ត្រអន្តរជាតិសាខាទី៩';
       this.state.examInfo.location = 'រាជធានីភ្នំពេញ';
     } else if (type === 'mock2') {
       this.state.examInfo.examTitle = 'ប្រឡងសាកល្បងលើកទី២';
+      this.state.examInfo.examSession = 'សម័យប្រឡង ៖ ៧ ធ្នូ ២០២៦';
+      this.state.examInfo.showCenter = true;
+      this.state.examInfo.centerName = 'សាលាបញ្ញាសាស្ត្រអន្តរជាតិសាខាទី៩';
+      this.state.examInfo.location = 'រាជធានីភ្នំពេញ';
+    } else if (type === 'outstanding') {
+      this.state.examInfo.examTitle = 'ប្រឡងជ្រើសរើសសិស្សពូកែ';
+      this.state.examInfo.examSession = 'សម័យប្រឡង ៖ ២១ កញ្ញា ២០២៦';
       this.state.examInfo.location = 'រាជធានីភ្នំពេញ';
     } else if (type === 'brevet') {
       this.state.examInfo.examTitle = 'ប្រឡងសញ្ញាបត្រមធ្យមសិក្សាបឋមភូមិ';
@@ -1244,6 +1252,20 @@ class BadgeApp {
     this.populateInputs();
     this.saveState();
     this.renderBadgesOnly();
+  }
+
+  // Copy shareable online link
+  copyShareLink() {
+    const url = 'https://ritthyhong-arch.github.io/Examination-Committee/';
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(() => {
+        alert('🎉 បានចម្លងតំណភ្ជាប់រួចរាល់ហើយ ៖\n' + url + '\n\nលោកអ្នកអាចផ្ញើតំណភ្ជាប់នេះតាម Telegram, Facebook Messenger ឬ Email ទៅកាន់សហការី ឬអ្នកដទៃ ដើម្បីចូលប្រើប្រាស់ប្រព័ន្ធដែលបាន Update ថ្មីៗបានភ្លាមៗ!');
+      }).catch(() => {
+        prompt('សូមចម្លងតំណភ្ជាប់ខាងក្រោមដើម្បីផ្ញើទៅកាន់អ្នកដទៃ ៖', url);
+      });
+    } else {
+      prompt('សូមចម្លងតំណភ្ជាប់ខាងក្រោមដើម្បីផ្ញើទៅកាន់អ្នកដទៃ ៖', url);
+    }
   }
 
   // Convert Gregorian Date to Khmer String
