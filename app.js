@@ -32,12 +32,12 @@ const COLOR_PALETTE = [
 // Initial State matching the user uploaded sample
 const INITIAL_STATE = {
   examInfo: {
-    examTitle: 'ប្រឡងជ្រើសរើសសិស្សពូកែ',
-    examSession: 'សម័យប្រឡង ៖ ២១ កញ្ញា ២០២៦',
+    examTitle: 'ប្រឡងសាកល្បងលើកទី១',
+    examSession: 'សម័យប្រឡង ៖ ៧ ធ្នូ ២០២៦',
     location: 'រាជធានីភ្នំពេញ',
     locationColor: '#c81d1a',
     academicYear: 'ឆ្នាំសិក្សា ២០២៦-២០២៧',
-    showCenter: false,
+    showCenter: true,
     centerName: 'វិទ្យាល័យព្រះស៊ីសុវត្ថិ',
     logoUrl: (typeof DEFAULT_ASSETS !== 'undefined' && DEFAULT_ASSETS.logo) ? DEFAULT_ASSETS.logo : 'assets/logo.png',
     dividerUrl: (typeof DEFAULT_ASSETS !== 'undefined' && DEFAULT_ASSETS.divider) ? DEFAULT_ASSETS.divider : 'assets/divider.png',
@@ -221,6 +221,17 @@ class BadgeApp {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed && parsed.examInfo) {
+          // If browser only holds the outdated initial template, auto-upgrade to the new official default template
+          if (parsed.examInfo.examTitle === 'ប្រឡងជ្រើសរើសសិស្សពូកែ' &&
+              parsed.examInfo.examSession &&
+              parsed.examInfo.examSession.includes('២១ កញ្ញា')) {
+            const fresh = JSON.parse(JSON.stringify(INITIAL_STATE));
+            try {
+              localStorage.setItem('exam_badge_state_v1', JSON.stringify(fresh));
+              saveToIndexedDB(fresh);
+            } catch (e) {}
+            return fresh;
+          }
           // Ensure assets are present
           if (!parsed.examInfo.logoUrl && typeof DEFAULT_ASSETS !== 'undefined') {
             parsed.examInfo.logoUrl = DEFAULT_ASSETS.logo;
