@@ -147,9 +147,44 @@ class BadgeApp {
   saveState() {
     try {
       localStorage.setItem('exam_badge_state_v1', JSON.stringify(this.state));
+      this.triggerAutoSaveIndicator();
     } catch (e) {
       console.error('Save state failed', e);
+      const textEl = document.getElementById('autoSaveText');
+      if (textEl) textEl.innerText = 'កំហុសរក្សាទុក';
     }
+  }
+
+  manualSave() {
+    this.saveState();
+    alert('✅ បានរក្សាទុកទិន្នន័យដោយជោគជ័យ និងស្វ័យប្រវត្តិ!\nរាល់ការកែប្រែទាំងអស់ត្រូវបានកត់ត្រាទុកយ៉ាងមានសុវត្ថិភាព។');
+  }
+
+  triggerAutoSaveIndicator() {
+    const indicator = document.getElementById('autoSaveIndicator');
+    const textEl = document.getElementById('autoSaveText');
+    const dotEl = document.getElementById('autoSaveDot');
+    if (!indicator || !textEl) return;
+
+    const now = new Date();
+    const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+    const khmerTime = toKhmerNumber(timeStr);
+
+    indicator.className = 'inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-emerald-100 border border-emerald-400 text-emerald-900 text-xs font-semibold rounded-lg shadow-xs transition-all';
+    if (dotEl) {
+      dotEl.className = 'w-2 h-2 rounded-full bg-emerald-600 animate-ping';
+      setTimeout(() => {
+        if (dotEl) dotEl.className = 'w-2 h-2 rounded-full bg-emerald-500';
+      }, 400);
+    }
+    textEl.innerText = `រក្សាទុករួចរាល់ (${khmerTime})`;
+
+    clearTimeout(this._saveTimeout);
+    this._saveTimeout = setTimeout(() => {
+      if (indicator) {
+        indicator.className = 'inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs font-semibold rounded-lg shadow-xs transition-all';
+      }
+    }, 2000);
   }
 
   initDOM() {
@@ -331,6 +366,7 @@ class BadgeApp {
     if (this.cardColGapVal) this.cardColGapVal.innerText = `${toKhmerNumber(colGap)} mm`;
     if (this.cardRowGapInput) this.cardRowGapInput.value = rowGap;
     if (this.cardRowGapVal) this.cardRowGapVal.innerText = `${toKhmerNumber(rowGap)} mm`;
+    this.triggerAutoSaveIndicator();
   }
 
   applyPrintScale() {
@@ -670,12 +706,24 @@ class BadgeApp {
       this.zoomSelect.addEventListener('change', (e) => {
         this.state.ui.zoom = parseInt(e.target.value, 10);
         this.applyZoom();
+        this.saveState();
       });
     }
 
     // Window Resize -> Auto adjust responsive preview if needed
     window.addEventListener('resize', () => {
       this.applyZoom();
+    });
+
+    // Instant Auto-Save on page exit or blur
+    window.addEventListener('beforeunload', () => {
+      this.saveState();
+    });
+    window.addEventListener('pagehide', () => {
+      this.saveState();
+    });
+    window.addEventListener('blur', () => {
+      this.saveState();
     });
   }
 
