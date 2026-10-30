@@ -32,13 +32,13 @@ const COLOR_PALETTE = [
 // Initial State matching the user uploaded sample
 const INITIAL_STATE = {
   examInfo: {
-    examTitle: 'ប្រឡងសាកល្បងលើកទី១',
-    examSession: 'សម័យប្រឡង ៖ ៧ ធ្នូ ២០២៦',
+    examTitle: 'ប្រឡងជ្រើសរើសសិស្សពូកែ',
+    examSession: 'សម័យប្រឡង ៖ ២១ កញ្ញា ២០២៦',
     location: 'រាជធានីភ្នំពេញ',
     locationColor: '#c81d1a',
     academicYear: 'ឆ្នាំសិក្សា ២០២៦-២០២៧',
-    showCenter: true,
-    centerName: 'សាលាបញ្ញាសាស្ត្រអន្តរជាតិសាខាទី៩',
+    showCenter: false,
+    centerName: 'វិទ្យាល័យព្រះស៊ីសុវត្ថិ',
     logoUrl: (typeof DEFAULT_ASSETS !== 'undefined' && DEFAULT_ASSETS.logo) ? DEFAULT_ASSETS.logo : 'assets/logo.png',
     dividerUrl: (typeof DEFAULT_ASSETS !== 'undefined' && DEFAULT_ASSETS.divider) ? DEFAULT_ASSETS.divider : 'assets/divider.png',
     dividerType: 'image', // 'image', 'svg', 'none'
@@ -65,14 +65,13 @@ const INITIAL_STATE = {
     mode: 'roles'         // 'roles' or 'members'
   },
   roles: [
-    { id: 1, name: 'ប្រធានគណៈមេប្រយោគ', color: '#d32f2f', qty: 1 },
+    { id: 1, name: 'ប្រធានមណ្ឌល', color: '#d32f2f', qty: 1 },
     { id: 2, name: 'អនុប្រធានមណ្ឌល', color: '#d32f2f', qty: 1 },
     { id: 3, name: 'គណៈកម្មការ\nកណ្ដាល', color: '#f5a623', qty: 1 },
     { id: 4, name: 'គណៈកម្មការ\nអប្បមាទ', color: '#00a3e8', qty: 1 },
     { id: 5, name: 'គណៈកម្មការ\nអនុរក្ស', color: '#10b981', qty: 4 },
-    { id: 6, name: 'គណៈកម្មការ\nសន្តិសុខមណ្ឌលសំណេរ', color: '#475569', qty: 2 },
-    { id: 7, name: 'គណៈកម្មការ\nកែផ្ទៀង', color: '#8b5cf6', qty: 2 },
-    { id: 8, name: 'គណៈកម្មការ\nលេខាធិការ', color: '#f97316', qty: 2 }
+    { id: 6, name: 'គណៈកម្មការ\nកែផ្ទៀង', color: '#8b5cf6', qty: 2 },
+    { id: 7, name: 'គណៈកម្មការ\nលេខាធិការ', color: '#f97316', qty: 2 }
   ],
   members: [
     { id: 1, name: 'លោក ស៊ុន វណ្ណា', gender: 'ប្រុស', role: 'ប្រធានមណ្ឌល', color: '#d32f2f', unit: 'វិទ្យាល័យព្រះស៊ីសុវត្ថិ', room: 'ការិយាល័យមណ្ឌល' },
@@ -88,8 +87,6 @@ const INITIAL_STATE = {
   }
 };
 
-const CURRENT_DATA_VERSION = '20261030_v5';
-
 class BadgeApp {
   constructor() {
     this.state = this.loadState();
@@ -99,56 +96,20 @@ class BadgeApp {
   }
 
   loadState() {
-    // 1. Check if URL contains shared data (#data= or ?data=)
     try {
-      let encodedData = null;
-      if (window.location.hash && window.location.hash.startsWith('#data=')) {
-        encodedData = window.location.hash.substring(6);
-      } else if (window.location.search) {
-        const urlParams = new URLSearchParams(window.location.search);
-        encodedData = urlParams.get('data');
-      }
-
-      if (encodedData) {
-        const jsonStr = decodeURIComponent(escape(atob(encodedData)));
-        const decoded = JSON.parse(jsonStr);
-        if (decoded && decoded.examInfo) {
-          if (!decoded.examInfo.logoUrl && typeof DEFAULT_ASSETS !== 'undefined') {
-            decoded.examInfo.logoUrl = DEFAULT_ASSETS.logo;
-          }
-          if (!decoded.examInfo.dividerUrl && typeof DEFAULT_ASSETS !== 'undefined') {
-            decoded.examInfo.dividerUrl = DEFAULT_ASSETS.divider;
-          }
-          localStorage.setItem('exam_badge_version', CURRENT_DATA_VERSION);
-          localStorage.setItem('exam_badge_state_v2', JSON.stringify(decoded));
-          // Clean hash from address bar without reloading
-          if (window.history && window.history.replaceState) {
-            window.history.replaceState(null, null, window.location.pathname);
-          }
-          setTimeout(() => {
-            alert('🎉 បានផ្ទុកទិន្នន័យដែលបានចែករំលែកដោយជោគជ័យ!\n(Shared examination data loaded successfully!)');
-          }, 400);
-          return decoded;
+      localStorage.removeItem('exam_badge_state_v2');
+      localStorage.removeItem('exam_badge_version');
+      const saved = localStorage.getItem('exam_badge_state_v1');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.examInfo && (
+          (parsed.examInfo.examSession && parsed.examInfo.examSession.includes('៧ ធ្នូ')) ||
+          (parsed.examInfo.centerName && parsed.examInfo.centerName.includes('បញ្ញាសាស្ត្រ'))
+        )) {
+          localStorage.removeItem('exam_badge_state_v1');
+          return JSON.parse(JSON.stringify(INITIAL_STATE));
         }
       }
-    } catch (e) {
-      console.warn('Failed to parse URL shared data', e);
-    }
-
-    // 2. Force upgrade if visitor has older cached version
-    const savedVersion = localStorage.getItem('exam_badge_version');
-    if (savedVersion !== CURRENT_DATA_VERSION) {
-      console.log('Migrating to latest template version:', CURRENT_DATA_VERSION);
-      localStorage.removeItem('exam_badge_state_v1'); // Remove old stuck cache
-      localStorage.setItem('exam_badge_version', CURRENT_DATA_VERSION);
-      const freshState = JSON.parse(JSON.stringify(INITIAL_STATE));
-      localStorage.setItem('exam_badge_state_v2', JSON.stringify(freshState));
-      return freshState;
-    }
-
-    // 3. Normal load from localStorage v2
-    try {
-      const saved = localStorage.getItem('exam_badge_state_v2');
       if (saved) {
         const parsed = JSON.parse(saved);
         // Ensure assets are present
@@ -185,8 +146,7 @@ class BadgeApp {
 
   saveState() {
     try {
-      localStorage.setItem('exam_badge_version', CURRENT_DATA_VERSION);
-      localStorage.setItem('exam_badge_state_v2', JSON.stringify(this.state));
+      localStorage.setItem('exam_badge_state_v1', JSON.stringify(this.state));
     } catch (e) {
       console.error('Save state failed', e);
     }
@@ -1266,34 +1226,24 @@ class BadgeApp {
 
   // Reset to initial sample design
   resetToTemplate() {
-    if (confirm('តើអ្នកចង់កំណត់ប្រព័ន្ធឡើងវិញទៅគំរូថ្មីចុងក្រោយ (សម័យប្រឡង ៧ ធ្នូ ២០២៦) មែនទេ?')) {
-      localStorage.removeItem('exam_badge_state_v1');
-      localStorage.setItem('exam_badge_version', CURRENT_DATA_VERSION);
+    if (confirm('តើអ្នកចង់កំណត់ប្រព័ន្ធឡើងវិញទៅគំរូដើម (ដូចរូបភាពគំរូ) មែនទេ?')) {
       this.state = JSON.parse(JSON.stringify(INITIAL_STATE));
       this.saveState();
       this.populateInputs();
       this.render();
-      alert('✅ បានកំណត់ទិន្នន័យឡើងវិញទៅគំរូថ្មីចុងក្រោយដោយជោគជ័យ!');
     }
   }
 
   // Load Exam Type Preset
   loadExamPreset(type) {
-    if (type === 'mock1' || type === 'bacii') {
+    if (type === 'outstanding') {
+      this.state.examInfo.examTitle = 'ប្រឡងជ្រើសរើសសិស្សពូកែ';
+      this.state.examInfo.location = 'រាជធានីភ្នំពេញ';
+    } else if (type === 'mock1' || type === 'bacii') {
       this.state.examInfo.examTitle = 'ប្រឡងសាកល្បងលើកទី១';
-      this.state.examInfo.examSession = 'សម័យប្រឡង ៖ ៧ ធ្នូ ២០២៦';
-      this.state.examInfo.showCenter = true;
-      this.state.examInfo.centerName = 'សាលាបញ្ញាសាស្ត្រអន្តរជាតិសាខាទី៩';
       this.state.examInfo.location = 'រាជធានីភ្នំពេញ';
     } else if (type === 'mock2') {
       this.state.examInfo.examTitle = 'ប្រឡងសាកល្បងលើកទី២';
-      this.state.examInfo.examSession = 'សម័យប្រឡង ៖ ៧ ធ្នូ ២០២៦';
-      this.state.examInfo.showCenter = true;
-      this.state.examInfo.centerName = 'សាលាបញ្ញាសាស្ត្រអន្តរជាតិសាខាទី៩';
-      this.state.examInfo.location = 'រាជធានីភ្នំពេញ';
-    } else if (type === 'outstanding') {
-      this.state.examInfo.examTitle = 'ប្រឡងជ្រើសរើសសិស្សពូកែ';
-      this.state.examInfo.examSession = 'សម័យប្រឡង ៖ ២១ កញ្ញា ២០២៦';
       this.state.examInfo.location = 'រាជធានីភ្នំពេញ';
     } else if (type === 'brevet') {
       this.state.examInfo.examTitle = 'ប្រឡងសញ្ញាបត្រមធ្យមសិក្សាបឋមភូមិ';
@@ -1306,45 +1256,6 @@ class BadgeApp {
     this.populateInputs();
     this.saveState();
     this.renderBadgesOnly();
-  }
-
-  // Generate shareable link with current customized data
-  getShareableDataUrl() {
-    const baseUrl = 'https://ritthyhong-arch.github.io/Examination-Committee/';
-    try {
-      // Clone state but omit heavy custom base64 bg/logo if too large to fit in URL
-      const exportState = JSON.parse(JSON.stringify(this.state));
-      if (exportState.examInfo.logoUrl && exportState.examInfo.logoUrl.length > 5000) {
-        exportState.examInfo.logoUrl = null; // will use default logo on client
-      }
-      if (exportState.examInfo.bgUrl && exportState.examInfo.bgUrl.length > 5000) {
-        exportState.examInfo.bgUrl = null;
-      }
-      const jsonStr = JSON.stringify(exportState);
-      const b64 = btoa(unescape(encodeURIComponent(jsonStr)));
-      return baseUrl + '#data=' + b64;
-    } catch (e) {
-      console.warn('Failed to encode shareable data', e);
-      return baseUrl;
-    }
-  }
-
-  // Copy shareable online link
-  copyShareLink(withData = false) {
-    const url = withData ? this.getShareableDataUrl() : 'https://ritthyhong-arch.github.io/Examination-Committee/';
-    const msg = withData
-      ? '🎉 បានចម្លងតំណភ្ជាប់ «រួមជាមួយទិន្នន័យដែលអ្នកបានកែ» រួចរាល់ហើយ!\n\nអ្នកទទួលតំណភ្ជាប់នេះ នឹងឃើញទិន្នន័យដូចគ្នាបេះបិទនឹងអ្វីដែលអ្នកបានកែភ្លាមៗ ៖\n' + url
-      : '🎉 បានចម្លងតំណភ្ជាប់ប្រព័ន្ធផ្លូវការរួចរាល់ហើយ ៖\n' + url + '\n\nលោកអ្នកអាចផ្ញើតំណភ្ជាប់នេះតាម Telegram ឬ Facebook ទៅកាន់សហការីបានភ្លាមៗ!';
-
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(url).then(() => {
-        alert(msg);
-      }).catch(() => {
-        prompt('សូមចម្លងតំណភ្ជាប់ខាងក្រោម ៖', url);
-      });
-    } else {
-      prompt('សូមចម្លងតំណភ្ជាប់ខាងក្រោម ៖', url);
-    }
   }
 
   // Convert Gregorian Date to Khmer String

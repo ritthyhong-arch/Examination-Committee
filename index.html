@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&family=Kantumruy+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Moul&display=swap" rel="stylesheet">
   <!-- Custom Styles with cache-buster -->
-  <link rel="stylesheet" href="style.css?v=20261030_v5">
+  <link rel="stylesheet" href="style.css?v=20261028_restored">
   <script>
     tailwind.config = {
       theme: {
@@ -45,12 +45,9 @@
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
         </div>
         <div>
-          <div class="flex items-center gap-2">
-            <h1 class="font-khmer-moul text-sm sm:text-base text-slate-900 leading-tight">
-              ប្រព័ន្ធបង្កើតស្លាកសញ្ញាគណៈកម្មការប្រឡង
-            </h1>
-            <span class="hidden sm:inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">Updated: ៧ ធ្នូ ២០២៦</span>
-          </div>
+          <h1 class="font-khmer-moul text-sm sm:text-base text-slate-900 leading-tight">
+            ប្រព័ន្ធបង្កើតស្លាកសញ្ញាគណៈកម្មការប្រឡង
+          </h1>
           <p class="text-xs text-slate-500 font-khmer-body">
             រៀបចំ និងបោះពុម្ពស្លាកសញ្ញាគណៈកម្មការដំណើរការប្រឡង (ក្រដាស A4 មួយសន្លឹកមាន ៤ ស្លាក)
           </p>
@@ -59,12 +56,6 @@
 
       <!-- Header Actions -->
       <div class="flex items-center gap-2">
-        <!-- Share Online Link Button -->
-        <button onclick="document.getElementById('modalShare').classList.remove('hidden')" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-all active:scale-95" title="ចែករំលែកតំណភ្ជាប់ទៅកាន់អ្នកផ្សេង">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
-          <span class="hidden sm:inline">ចែករំលែក Link</span>
-        </button>
-
         <!-- Print Help Button -->
         <button onclick="document.getElementById('modalHelp').classList.remove('hidden')" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-lg transition-colors" title="ការណែនាំអំពីការបោះពុម្ព">
           <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -72,9 +63,9 @@
         </button>
 
         <!-- Reset Button -->
-        <button onclick="window.app.resetToTemplate()" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 text-xs font-semibold rounded-lg transition-colors" title="កំណត់ដូចគំរូថ្មីចុងក្រោយ">
-          <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-          <span class="hidden sm:inline">គំរូថ្មីចុងក្រោយ</span>
+        <button onclick="window.app.resetToTemplate()" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-lg transition-colors" title="កំណត់ដូចគំរូដើម">
+          <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+          <span class="hidden sm:inline">គំរូដើម</span>
         </button>
 
         <!-- Print Action -->
@@ -698,59 +689,6 @@
     </div>
   </div>
 
-  <!-- ================= SHARE MODAL ================= -->
-  <div id="modalShare" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
-    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl space-y-4">
-      <div class="flex items-center justify-between border-b pb-3">
-        <div class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path></svg>
-          </div>
-          <h3 class="font-khmer-moul text-base text-slate-900">ចែករំលែកប្រព័ន្ធទៅកាន់អ្នកដទៃ</h3>
-        </div>
-        <button onclick="document.getElementById('modalShare').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 p-1">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-        </button>
-      </div>
-
-      <div class="space-y-4 text-xs text-slate-700">
-        <!-- Option 1: Official Clean Link -->
-        <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
-          <div class="flex items-center justify-between">
-            <span class="font-bold text-slate-900 text-xs">១. តំណភ្ជាប់ប្រព័ន្ធផ្លូវការ (Default System Link) ៖</span>
-            <span class="text-[10px] bg-blue-100 text-blue-700 font-semibold px-2 py-0.5 rounded-full">គំរូថ្មីចុងក្រោយ</span>
-          </div>
-          <p class="text-slate-500 text-[11px]">សម្រាប់ផ្ញើឱ្យសហការីចូលរៀបចំ និងបោះពុម្ពស្លាកសញ្ញា (ទាញយកទិន្នន័យថ្មីបំផុតពី Server) ៖</p>
-          <div class="flex gap-2">
-            <input type="text" readonly value="https://ritthyhong-arch.github.io/Examination-Committee/" class="flex-1 px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-mono text-slate-600 select-all">
-            <button onclick="window.app.copyShareLink(false)" class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold flex items-center gap-1 shadow-sm">
-              <span>ចម្លង Link</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Option 2: Share with Current Edited Data -->
-        <div class="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl space-y-2">
-          <div class="flex items-center justify-between">
-            <span class="font-bold text-emerald-950 text-xs">២. តំណភ្ជាប់ «រួមជាមួយទិន្នន័យដែលអ្នកបានកែ» (Share with My Edits) ៖</span>
-            <span class="text-[10px] bg-emerald-200 text-emerald-800 font-bold px-2 py-0.5 rounded-full">មានទិន្នន័យស្រេច</span>
-          </div>
-          <p class="text-emerald-800 text-[11px]">ប្រសិនបើអ្នកបានវាយឈ្មោះ ឬកែសម្រួលតួនាទីរួចរាល់ ហើយចង់ឱ្យអ្នកផ្សេងបើកមកឃើញដូចគ្នាបេះបិទ សូមចម្លង Link នេះ ៖</p>
-          <button onclick="window.app.copyShareLink(true)" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold flex items-center justify-center gap-1.5 shadow-sm transition-colors">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-            <span>ចម្លង Link ភ្ជាប់ទិន្នន័យដែលបានកែ</span>
-          </button>
-        </div>
-      </div>
-
-      <div class="pt-3 border-t flex justify-end">
-        <button onclick="document.getElementById('modalShare').classList.add('hidden')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg">
-          បិទ
-        </button>
-      </div>
-    </div>
-  </div>
-
   <!-- ================= ADD MEMBER MODAL ================= -->
   <div id="modalAddMember" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
     <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl space-y-4">
@@ -830,7 +768,7 @@
   </script>
 
   <!-- Load Embedded Assets & App with cache-buster -->
-  <script src="assets.js?v=20261030_v5"></script>
-  <script src="app.js?v=20261030_v5"></script>
+  <script src="assets.js?v=20261028_restored"></script>
+  <script src="app.js?v=20261028_restored"></script>
 </body>
 </html>
