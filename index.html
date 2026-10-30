@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&family=Kantumruy+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Moul&display=swap" rel="stylesheet">
   <!-- Custom Styles with cache-buster -->
-  <link rel="stylesheet" href="style.css?v=20261030_force_logo_upgrade">
+  <link rel="stylesheet" href="style.css?v=20261030_shared_data_sync">
   <script>
     tailwind.config = {
       theme: {
@@ -68,6 +68,12 @@
           <span class="hidden sm:inline">រក្សាទុក</span>
         </button>
 
+
+        <!-- Shared Data Sync Button -->
+        <button id="btnServerSync" onclick="window.app.syncWithServer(true)" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 text-xs font-semibold rounded-lg shadow-xs transition-all active:scale-95" title="ទាញយកទិន្នន័យផ្លូវការចុងក្រោយពី Server ដើម្បីឱ្យដូចគ្រប់គ្នា">
+          <svg id="syncIcon" class="w-3.5 h-3.5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+          <span id="syncText">Sync ទិន្នន័យរួម</span>
+        </button>
 
         <!-- Print Action -->
         <button onclick="window.app.print()" class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs sm:text-sm font-semibold rounded-lg shadow-sm transition-all hover:shadow active:scale-95">
@@ -769,7 +775,7 @@
   </script>
 
   <!-- Load Embedded Assets & App with cache-buster -->
-  <script src="assets.js?v=20261030_force_logo_upgrade"></script>
-  <script src="app.js?v=20261030_force_logo_upgrade"></script>
+  <script src="assets.js?v=20261030_shared_data_sync"></script>
+  <script src="app.js?v=20261030_shared_data_sync"></script>
 </body>
 </html>

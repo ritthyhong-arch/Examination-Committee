@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "updatedAt": "2026-10-30T20:35:00+07:00",
+  "note": "Official Exam Badge Shared Data for all users",
+  "examInfo": {
+    "examTitle": "ប្រឡងសាកល្បងលើកទី១",
+    "examSession": "សម័យប្រឡង ៖ ៧ ធ្នូ ២០២៦",
+    "location": "រាជធានីភ្នំពេញ",
+    "locationColor": "#c81d1a",
+    "academicYear": "ឆ្នាំសិក្សា ២០២៦-២០២៧",
+    "showCenter": true,
+    "centerName": "វិទ្យាល័យព្រះស៊ីសុវត្ថិ",
+    "dividerType": "svg",
+    "borderWidth": 6.5,
+    "borderRadius": 3,
+    "logoSize": 28,
+    "roleFontSize": 22,
+    "titleFontSize": 13,
+    "sessionFontSize": 10,
+    "centerFontSize": 9.5,
+    "yearFontSize": 10,
+    "locationFontSize": 15.5,
+    "sessionGap": 3.5,
+    "centerGap": 2.5,
+    "yearGap": 3,
+    "footerBottom": 6.5,
+    "bgOpacity": 25,
+    "bgFit": "cover",
+    "printScale": 90,
+    "cardColGap": 8,
+    "cardRowGap": 10,
+    "showCutMarks": false,
+    "mode": "roles"
+  },
+  "roles": [
+    { "id": 1, "name": "ប្រធានមណ្ឌល", "color": "#d32f2f", "qty": 1 },
+    { "id": 2, "name": "អនុប្រធានមណ្ឌល", "color": "#d32f2f", "qty": 1 },
+    { "id": 3, "name": "គណៈកម្មការ\nកណ្ដាល", "color": "#f5a623", "qty": 1 },
+    { "id": 4, "name": "គណៈកម្មការ\nអប្បមាទ", "color": "#00a3e8", "qty": 1 },
+    { "id": 5, "name": "គណៈកម្មការ\nអនុរក្ស", "color": "#10b981", "qty": 4 },
+    { "id": 6, "name": "គណៈកម្មការ\nកែផ្ទៀង", "color": "#8b5cf6", "qty": 2 },
+    { "id": 7, "name": "គណៈកម្មការ\nលេខាធិការ", "color": "#f97316", "qty": 2 }
+  ],
+  "members": [
+    { "id": 1, "name": "លោក ស៊ុន វណ្ណា", "gender": "ប្រុស", "role": "ប្រធានមណ្ឌល", "color": "#d32f2f", "unit": "វិទ្យាល័យព្រះស៊ីសុវត្ថិ", "room": "ការិយាល័យមណ្ឌល" },
+    { "id": 2, "name": "លោកស្រី កែវ មុនី", "gender": "ស្រី", "role": "អនុប្រធានមណ្ឌល", "color": "#d32f2f", "unit": "វិទ្យាល័យបាក់ទូក", "room": "ការិយាល័យមណ្ឌល" },
+    { "id": 3, "name": "លោក ចាន់ ធី", "gender": "ប្រុស", "role": "គណៈកម្មការកណ្ដាល", "color": "#f5a623", "unit": "ការិយាល័យអប់រំ", "room": "បន្ទប់ប្រជុំ" },
+    { "id": 4, "name": "លោក ហេង សុផល", "gender": "ប្រុស", "role": "គណៈកម្មការអប្បមាទ", "color": "#00a3e8", "unit": "នាយកដ្ឋានត្រួតពិនិត្យ", "room": "អប្បមាទ" }
+  ]
+}

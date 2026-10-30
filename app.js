@@ -192,6 +192,8 @@ class BadgeApp {
     this.bindEvents();
     this.render();
     this.checkIndexedDBBackup();
+    this.syncWithServer(false);
+    this.initAutoSyncInterval();
   }
 
   async checkIndexedDBBackup() {
@@ -344,6 +346,108 @@ class BadgeApp {
     } else {
       alert('⚠️ មានបញ្ហាក្នុងការរក្សាទុកទិន្នន័យ! សូមពិនិត្យទំហំផ្ទុក ឬជ្រើសរើស Export JSON ដើម្បីរក្សាទុកជាឯកសារ។');
     }
+  }
+
+  // Synchronize state with central shared-data.json on server
+  async syncWithServer(force = false) {
+    const syncBtn = document.getElementById('btnServerSync');
+    const syncText = document.getElementById('syncText');
+    const syncIcon = document.getElementById('syncIcon');
+
+    if (syncIcon) syncIcon.classList.add('animate-spin');
+    if (syncText && force) syncText.innerText = 'កំពុងទាញ...';
+
+    try {
+      const res = await fetch(`shared-data.json?t=${Date.now()}`, {
+        cache: 'no-store'
+      });
+      if (!res.ok) throw new Error('Shared data file not accessible');
+
+      const serverData = await res.json();
+      if (!serverData || !serverData.examInfo) throw new Error('Invalid shared data');
+
+      const localVer = parseInt(localStorage.getItem('shared_data_version') || '0', 10);
+      const serverVer = parseInt(serverData.version || '1', 10);
+
+      if (force || serverVer > localVer || !localStorage.getItem('shared_data_version')) {
+        // Merge official shared examInfo
+        Object.assign(this.state.examInfo, serverData.examInfo);
+
+        // Ensure clean default assets
+        if (typeof DEFAULT_ASSETS !== 'undefined') {
+          if (!this.state.examInfo.logoUrl ||
+              this.state.examInfo.logoUrl.includes('iVBORw0KGgoAAAANSUhEUgAAAHAAAABy') ||
+              this.state.examInfo.logoUrl.length < 50000) {
+            this.state.examInfo.logoUrl = DEFAULT_ASSETS.logo;
+          }
+          if (!this.state.examInfo.bgUrl) {
+            this.state.examInfo.bgUrl = DEFAULT_ASSETS.background;
+          }
+          if (!this.state.examInfo.dividerUrl) {
+            this.state.examInfo.dividerUrl = DEFAULT_ASSETS.divider;
+          }
+        }
+
+        if (Array.isArray(serverData.roles) && serverData.roles.length > 0) {
+          this.state.roles = JSON.parse(JSON.stringify(serverData.roles));
+        }
+        if (Array.isArray(serverData.members) && serverData.members.length > 0) {
+          this.state.members = JSON.parse(JSON.stringify(serverData.members));
+        }
+
+        localStorage.setItem('shared_data_version', String(serverVer));
+        this.saveState();
+        this.populateInputs();
+        this.render();
+
+        if (syncBtn) {
+          syncBtn.className = syncBtn.className
+            .replace(/bg-amber-\d+/g, 'bg-emerald-50')
+            .replace(/border-amber-\d+/g, 'border-emerald-300')
+            .replace(/text-amber-\d+/g, 'text-emerald-800');
+        }
+        if (syncText) syncText.innerText = `ទិន្នន័យរួម v${serverVer}`;
+
+        if (force) {
+          alert(`✅ បានធ្វើសមកាលកម្មទិន្នន័យផ្លូវការ (កំណែ v${serverVer}) ពី Server ដោយជោគជ័យ!\n\nរាល់ទិន្នន័យ អក្សរ និងតួនាទីទាំងអស់ត្រូវបាន Update ដូចគ្នាជាមួយគ្រប់ User ទាំងអស់។`);
+        }
+      } else {
+        if (syncBtn) {
+          syncBtn.className = syncBtn.className
+            .replace(/bg-amber-\d+/g, 'bg-emerald-50')
+            .replace(/border-amber-\d+/g, 'border-emerald-300')
+            .replace(/text-amber-\d+/g, 'text-emerald-800');
+        }
+        if (syncText) syncText.innerText = `ទិន្នន័យរួម v${serverVer}`;
+        if (force) {
+          alert(`✅ ទិន្នន័យរបស់លោកអ្នកបានទាន់សម័យជាមួយ Server រួចរាល់ហើយ (កំណែ v${serverVer})!`);
+        }
+      }
+    } catch (err) {
+      console.warn('syncWithServer error:', err);
+      if (syncText && force) syncText.innerText = 'Sync មិនបាន';
+      if (force) {
+        alert('⚠️ មិនអាចទាញយកទិន្នន័យពី Server បានទេនៅពេលនេះ (សូមពិនិត្យអ៊ីនធឺណិត)។');
+      }
+    } finally {
+      if (syncIcon) syncIcon.classList.remove('animate-spin');
+    }
+  }
+
+  initAutoSyncInterval() {
+    // Check every 45 seconds when page is active
+    setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        this.syncWithServer(false);
+      }
+    }, 45000);
+
+    // Also check when tab regains focus
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        this.syncWithServer(false);
+      }
+    });
   }
 
   triggerAutoSaveIndicator() {
