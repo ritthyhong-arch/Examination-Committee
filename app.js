@@ -55,7 +55,7 @@ const INITIAL_STATE = {
     centerGap: 2.5,       // in mm (gap between session and center name)
     yearGap: 3,           // in mm (gap between location and academic year)
     footerBottom: 6.5,    // in mm (bottom space/lift for footer)
-    bgUrl: null,          // Background image URL/DataURL
+    bgUrl: (typeof DEFAULT_ASSETS !== 'undefined' && DEFAULT_ASSETS.background) ? DEFAULT_ASSETS.background : 'assets/background.jpg', // Background image URL/DataURL
     bgOpacity: 25,        // in percent (5-100)
     bgFit: 'cover',       // 'cover', 'contain', 'center'
     printScale: 90,       // in percentage (75% to 105%), default 90% gives ~17mm side margins
@@ -238,6 +238,9 @@ class BadgeApp {
           }
           if (!parsed.examInfo.dividerUrl && typeof DEFAULT_ASSETS !== 'undefined') {
             parsed.examInfo.dividerUrl = DEFAULT_ASSETS.divider;
+          }
+          if (!parsed.examInfo.bgUrl && typeof DEFAULT_ASSETS !== 'undefined' && DEFAULT_ASSETS.background) {
+            parsed.examInfo.bgUrl = DEFAULT_ASSETS.background;
           }
           if (!parsed.examInfo.logoSize) parsed.examInfo.logoSize = 28;
           if (!parsed.examInfo.roleFontSize) parsed.examInfo.roleFontSize = 22;
