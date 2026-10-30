@@ -41,7 +41,7 @@ const INITIAL_STATE = {
     centerName: 'វិទ្យាល័យព្រះស៊ីសុវត្ថិ',
     logoUrl: (typeof DEFAULT_ASSETS !== 'undefined' && DEFAULT_ASSETS.logo) ? DEFAULT_ASSETS.logo : 'assets/logo.png',
     dividerUrl: (typeof DEFAULT_ASSETS !== 'undefined' && DEFAULT_ASSETS.divider) ? DEFAULT_ASSETS.divider : 'assets/divider.png',
-    dividerType: 'image', // 'image', 'svg', 'none'
+    dividerType: 'svg', // 'svg', 'image', 'custom', 'none'
     borderWidth: 6.5,     // in mm
     borderRadius: 3,      // in mm
     logoSize: 28,         // in mm
@@ -238,6 +238,9 @@ class BadgeApp {
           }
           if (!parsed.examInfo.dividerUrl && typeof DEFAULT_ASSETS !== 'undefined') {
             parsed.examInfo.dividerUrl = DEFAULT_ASSETS.divider;
+          }
+          if (!parsed.examInfo.dividerType || parsed.examInfo.dividerType === 'image') {
+            parsed.examInfo.dividerType = 'svg';
           }
           if (!parsed.examInfo.bgUrl && typeof DEFAULT_ASSETS !== 'undefined' && DEFAULT_ASSETS.background) {
             parsed.examInfo.bgUrl = DEFAULT_ASSETS.background;
@@ -453,7 +456,7 @@ class BadgeApp {
     if (this.footerBottomVal) this.footerBottomVal.innerText = (info.footerBottom !== undefined ? info.footerBottom : 6.5) + ' mm';
     if (this.showCutMarksCheckbox) this.showCutMarksCheckbox.checked = !!info.showCutMarks;
     if (this.dividerTypeSelect) {
-      this.dividerTypeSelect.value = info.dividerType || 'image';
+      this.dividerTypeSelect.value = info.dividerType || 'svg';
       if (this.groupCustomDivider) {
         this.groupCustomDivider.style.display = info.dividerType === 'custom' ? 'block' : 'none';
       }
@@ -1315,7 +1318,7 @@ class BadgeApp {
 
     // Divider HTML
     let dividerHtml = '';
-    if (info.dividerType === 'image' && info.dividerUrl) {
+    if ((info.dividerType === 'image' || info.dividerType === 'custom') && info.dividerUrl) {
       dividerHtml = `<img src="${info.dividerUrl}" alt="Divider" class="badge-divider-img">`;
     } else if (info.dividerType === 'svg') {
       dividerHtml = `
