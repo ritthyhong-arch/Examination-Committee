@@ -87,56 +87,166 @@ const INITIAL_STATE = {
   }
 };
 
+// Lightweight IndexedDB Storage for bulletproof persistent saving without 5MB quota limits
+const DB_NAME = 'ExamBadgeDB';
+const DB_STORE = 'badge_state';
+const DB_KEY = 'saved_state';
+
+function openBadgeDB() {
+  return new Promise((resolve) => {
+    if (typeof indexedDB === 'undefined') return resolve(null);
+    try {
+      const req = indexedDB.open(DB_NAME, 1);
+      req.onupgradeneeded = (e) => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains(DB_STORE)) {
+          db.createObjectStore(DB_STORE);
+        }
+      };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => resolve(null);
+    } catch (e) {
+      resolve(null);
+    }
+  });
+}
+
+async function saveToIndexedDB(state) {
+  try {
+    const db = await openBadgeDB();
+    if (!db) return;
+    const tx = db.transaction(DB_STORE, 'readwrite');
+    tx.objectStore(DB_STORE).put(JSON.parse(JSON.stringify(state)), DB_KEY);
+  } catch (e) {
+    console.warn('IndexedDB write error', e);
+  }
+}
+
+async function loadFromIndexedDB() {
+  try {
+    const db = await openBadgeDB();
+    if (!db) return null;
+    return new Promise((resolve) => {
+      const tx = db.transaction(DB_STORE, 'readonly');
+      const req = tx.objectStore(DB_STORE).get(DB_KEY);
+      req.onsuccess = () => resolve(req.result || null);
+      req.onerror = () => resolve(null);
+    });
+  } catch (e) {
+    return null;
+  }
+}
+
+// Canvas-based image compressor to keep uploads under ~150-250KB
+function compressImageFile(file, maxDimension = 1200, quality = 0.8) {
+  return new Promise((resolve) => {
+    if (!file) return resolve(null);
+    if (!file.type.startsWith('image/') || file.type === 'image/svg+xml') {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target.result);
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(file);
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+        if (width > maxDimension || height > maxDimension) {
+          if (width > height) {
+            height = Math.round((height * maxDimension) / width);
+            width = maxDimension;
+          } else {
+            width = Math.round((width * maxDimension) / height);
+            height = maxDimension;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const isPng = file.type === 'image/png';
+        let dataUrl = canvas.toDataURL(isPng ? 'image/png' : 'image/jpeg', quality);
+        if (isPng && dataUrl.length > 500000) {
+          dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+        }
+        resolve(dataUrl);
+      };
+      img.onerror = () => resolve(e.target.result);
+      img.src = e.target.result;
+    };
+    reader.onerror = () => resolve(null);
+    reader.readAsDataURL(file);
+  });
+}
+
 class BadgeApp {
   constructor() {
     this.state = this.loadState();
     this.initDOM();
     this.bindEvents();
     this.render();
+    this.checkIndexedDBBackup();
+  }
+
+  async checkIndexedDBBackup() {
+    try {
+      const dbState = await loadFromIndexedDB();
+      if (!dbState || !dbState.examInfo) return;
+
+      const localStr = localStorage.getItem('exam_badge_state_v1');
+      if (!localStr) {
+        this.state = dbState;
+        this.populateInputs();
+        this.render();
+        this.saveState();
+      } else if (dbState.examInfo.bgUrl && !this.state.examInfo.bgUrl) {
+        this.state.examInfo.bgUrl = dbState.examInfo.bgUrl;
+        this.populateInputs();
+        this.renderBadgesOnly();
+      }
+    } catch (e) {
+      console.warn('checkIndexedDBBackup error', e);
+    }
   }
 
   loadState() {
     try {
-      localStorage.removeItem('exam_badge_state_v2');
-      localStorage.removeItem('exam_badge_version');
       const saved = localStorage.getItem('exam_badge_state_v1');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (parsed.examInfo && (
-          (parsed.examInfo.examSession && parsed.examInfo.examSession.includes('៧ ធ្នូ')) ||
-          (parsed.examInfo.centerName && parsed.examInfo.centerName.includes('បញ្ញាសាស្ត្រ'))
-        )) {
-          localStorage.removeItem('exam_badge_state_v1');
-          return JSON.parse(JSON.stringify(INITIAL_STATE));
+        if (parsed && parsed.examInfo) {
+          // Ensure assets are present
+          if (!parsed.examInfo.logoUrl && typeof DEFAULT_ASSETS !== 'undefined') {
+            parsed.examInfo.logoUrl = DEFAULT_ASSETS.logo;
+          }
+          if (!parsed.examInfo.dividerUrl && typeof DEFAULT_ASSETS !== 'undefined') {
+            parsed.examInfo.dividerUrl = DEFAULT_ASSETS.divider;
+          }
+          if (!parsed.examInfo.logoSize) parsed.examInfo.logoSize = 28;
+          if (!parsed.examInfo.roleFontSize) parsed.examInfo.roleFontSize = 22;
+          if (!parsed.examInfo.titleFontSize) parsed.examInfo.titleFontSize = 13;
+          if (parsed.examInfo.sessionFontSize === undefined) parsed.examInfo.sessionFontSize = 10;
+          if (parsed.examInfo.centerFontSize === undefined) parsed.examInfo.centerFontSize = 9.5;
+          if (parsed.examInfo.yearFontSize === undefined) parsed.examInfo.yearFontSize = 10;
+          if (parsed.examInfo.locationFontSize === undefined) parsed.examInfo.locationFontSize = 15.5;
+          if (parsed.examInfo.sessionGap === undefined) parsed.examInfo.sessionGap = 3.5;
+          if (parsed.examInfo.centerGap === undefined) parsed.examInfo.centerGap = 2.5;
+          if (parsed.examInfo.yearGap === undefined) parsed.examInfo.yearGap = 3;
+          if (parsed.examInfo.footerBottom === undefined) parsed.examInfo.footerBottom = 6.5;
+          if (parsed.examInfo.bgUrl === undefined) parsed.examInfo.bgUrl = null;
+          if (parsed.examInfo.bgOpacity === undefined) parsed.examInfo.bgOpacity = 25;
+          if (parsed.examInfo.bgFit === undefined) parsed.examInfo.bgFit = 'cover';
+          if (parsed.examInfo.printScale === undefined) parsed.examInfo.printScale = 90;
+          if (parsed.examInfo.cardColGap === undefined) parsed.examInfo.cardColGap = 8;
+          if (parsed.examInfo.cardRowGap === undefined) parsed.examInfo.cardRowGap = 10;
+          return parsed;
         }
-      }
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        // Ensure assets are present
-        if (!parsed.examInfo.logoUrl && typeof DEFAULT_ASSETS !== 'undefined') {
-          parsed.examInfo.logoUrl = DEFAULT_ASSETS.logo;
-        }
-        if (!parsed.examInfo.dividerUrl && typeof DEFAULT_ASSETS !== 'undefined') {
-          parsed.examInfo.dividerUrl = DEFAULT_ASSETS.divider;
-        }
-        if (!parsed.examInfo.logoSize) parsed.examInfo.logoSize = 28;
-        if (!parsed.examInfo.roleFontSize) parsed.examInfo.roleFontSize = 22;
-        if (!parsed.examInfo.titleFontSize) parsed.examInfo.titleFontSize = 13;
-        if (parsed.examInfo.sessionFontSize === undefined) parsed.examInfo.sessionFontSize = 10;
-        if (parsed.examInfo.centerFontSize === undefined) parsed.examInfo.centerFontSize = 9.5;
-        if (parsed.examInfo.yearFontSize === undefined) parsed.examInfo.yearFontSize = 10;
-        if (parsed.examInfo.locationFontSize === undefined) parsed.examInfo.locationFontSize = 15.5;
-        if (parsed.examInfo.sessionGap === undefined) parsed.examInfo.sessionGap = 3.5;
-        if (parsed.examInfo.centerGap === undefined) parsed.examInfo.centerGap = 2.5;
-        if (parsed.examInfo.yearGap === undefined) parsed.examInfo.yearGap = 3;
-        if (parsed.examInfo.footerBottom === undefined) parsed.examInfo.footerBottom = 6.5;
-        if (parsed.examInfo.bgUrl === undefined) parsed.examInfo.bgUrl = null;
-        if (parsed.examInfo.bgOpacity === undefined) parsed.examInfo.bgOpacity = 25;
-        if (parsed.examInfo.bgFit === undefined) parsed.examInfo.bgFit = 'cover';
-        if (parsed.examInfo.printScale === undefined || parsed.examInfo.printScale > 92) parsed.examInfo.printScale = 90;
-        if (parsed.examInfo.cardColGap === undefined) parsed.examInfo.cardColGap = 8;
-        if (parsed.examInfo.cardRowGap === undefined) parsed.examInfo.cardRowGap = 10;
-        return parsed;
       }
     } catch (e) {
       console.warn('Failed to load state from localStorage', e);
@@ -145,19 +255,43 @@ class BadgeApp {
   }
 
   saveState() {
+    let success = false;
     try {
       localStorage.setItem('exam_badge_state_v1', JSON.stringify(this.state));
-      this.triggerAutoSaveIndicator();
+      success = true;
     } catch (e) {
-      console.error('Save state failed', e);
+      console.warn('Full localStorage save failed (likely quota limit), saving safe fallback without large image...', e);
+      try {
+        const safe = JSON.parse(JSON.stringify(this.state));
+        if (safe.examInfo && safe.examInfo.bgUrl && safe.examInfo.bgUrl.length > 250000) {
+          safe.examInfo.bgUrl = null;
+        }
+        localStorage.setItem('exam_badge_state_v1', JSON.stringify(safe));
+        success = true;
+      } catch (err2) {
+        console.error('Fatal localStorage save error', err2);
+      }
+    }
+
+    // Always mirror full state to IndexedDB (no 5MB quota limit)
+    saveToIndexedDB(this.state);
+
+    if (success) {
+      this.triggerAutoSaveIndicator();
+    } else {
       const textEl = document.getElementById('autoSaveText');
       if (textEl) textEl.innerText = 'កំហុសរក្សាទុក';
     }
+    return success;
   }
 
   manualSave() {
-    this.saveState();
-    alert('✅ បានរក្សាទុកទិន្នន័យដោយជោគជ័យ និងស្វ័យប្រវត្តិ!\nរាល់ការកែប្រែទាំងអស់ត្រូវបានកត់ត្រាទុកយ៉ាងមានសុវត្ថិភាព។');
+    const ok = this.saveState();
+    if (ok) {
+      alert('✅ បានរក្សាទុកទិន្នន័យដោយជោគជ័យ!\n\nរាល់ការកែប្រែទាំងអស់ត្រូវបានកត់ត្រាទុកយ៉ាងមានសុវត្ថិភាព។ លោកអ្នកអាច Refresh ទំព័រ ឬបិទ browser បានដោយមិនបាត់បង់ទិន្នន័យឡើយ។');
+    } else {
+      alert('⚠️ មានបញ្ហាក្នុងការរក្សាទុកទិន្នន័យ! សូមពិនិត្យទំហំផ្ទុក ឬជ្រើសរើស Export JSON ដើម្បីរក្សាទុកជាឯកសារ។');
+    }
   }
 
   triggerAutoSaveIndicator() {
@@ -626,33 +760,29 @@ class BadgeApp {
 
     // Logo Upload
     if (this.logoFileInput) {
-      this.logoFileInput.addEventListener('change', (e) => {
+      this.logoFileInput.addEventListener('change', async (e) => {
         const file = e.target.files[0];
         if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (evt) => {
-          this.state.examInfo.logoUrl = evt.target.result;
-          if (this.logoPreview) this.logoPreview.src = evt.target.result;
-          this.saveState();
-          this.renderBadgesOnly();
-        };
-        reader.readAsDataURL(file);
+        const dataUrl = await compressImageFile(file, 600, 0.85);
+        if (!dataUrl) return;
+        this.state.examInfo.logoUrl = dataUrl;
+        if (this.logoPreview) this.logoPreview.src = dataUrl;
+        this.saveState();
+        this.renderBadgesOnly();
       });
     }
 
     // Background Upload
     if (this.bgFileInput) {
-      this.bgFileInput.addEventListener('change', (e) => {
+      this.bgFileInput.addEventListener('change', async (e) => {
         const file = e.target.files[0];
         if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (evt) => {
-          this.state.examInfo.bgUrl = evt.target.result;
-          this.populateInputs();
-          this.saveState();
-          this.renderBadgesOnly();
-        };
-        reader.readAsDataURL(file);
+        const dataUrl = await compressImageFile(file, 1200, 0.8);
+        if (!dataUrl) return;
+        this.state.examInfo.bgUrl = dataUrl;
+        this.populateInputs();
+        this.saveState();
+        this.renderBadgesOnly();
       });
     }
 
@@ -686,18 +816,16 @@ class BadgeApp {
 
     // Divider Upload
     if (this.dividerFileInput) {
-      this.dividerFileInput.addEventListener('change', (e) => {
+      this.dividerFileInput.addEventListener('change', async (e) => {
         const file = e.target.files[0];
         if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (evt) => {
-          this.state.examInfo.dividerUrl = evt.target.result;
-          this.state.examInfo.dividerType = 'image';
-          if (this.dividerTypeSelect) this.dividerTypeSelect.value = 'image';
-          this.saveState();
-          this.renderBadgesOnly();
-        };
-        reader.readAsDataURL(file);
+        const dataUrl = await compressImageFile(file, 800, 0.85);
+        if (!dataUrl) return;
+        this.state.examInfo.dividerUrl = dataUrl;
+        this.state.examInfo.dividerType = 'image';
+        if (this.dividerTypeSelect) this.dividerTypeSelect.value = 'image';
+        this.saveState();
+        this.renderBadgesOnly();
       });
     }
 
@@ -1279,6 +1407,7 @@ class BadgeApp {
       this.saveState();
       this.populateInputs();
       this.render();
+      saveToIndexedDB(this.state);
     }
   }
 
