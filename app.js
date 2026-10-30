@@ -205,10 +205,25 @@ class BadgeApp {
         this.populateInputs();
         this.render();
         this.saveState();
-      } else if (dbState.examInfo.bgUrl && !this.state.examInfo.bgUrl) {
-        this.state.examInfo.bgUrl = dbState.examInfo.bgUrl;
-        this.populateInputs();
-        this.renderBadgesOnly();
+      } else {
+        if (typeof DEFAULT_ASSETS !== 'undefined' && DEFAULT_ASSETS.logo) {
+          const l = this.state.examInfo.logoUrl || '';
+          const isOld = !l || l === 'assets/logo.png' || l === 'assets/logo.jpg' ||
+                        l.includes('iVBORw0KGgoAAAANSUhEUgAAAHAAAABy') ||
+                        l.startsWith('data:image/jpeg') ||
+                        (l.startsWith('data:image/png') && l.length < 50000);
+          if (isOld) {
+            this.state.examInfo.logoUrl = DEFAULT_ASSETS.logo;
+            this.populateInputs();
+            this.renderBadgesOnly();
+            this.saveState();
+          }
+        }
+        if (dbState.examInfo.bgUrl && !this.state.examInfo.bgUrl) {
+          this.state.examInfo.bgUrl = dbState.examInfo.bgUrl;
+          this.populateInputs();
+          this.renderBadgesOnly();
+        }
       }
     } catch (e) {
       console.warn('checkIndexedDBBackup error', e);
@@ -232,26 +247,38 @@ class BadgeApp {
             } catch (e) {}
             return fresh;
           }
-          // Ensure assets are present
-          if (!parsed.examInfo.logoUrl && typeof DEFAULT_ASSETS !== 'undefined') {
-            parsed.examInfo.logoUrl = DEFAULT_ASSETS.logo;
-          }
+          let upgraded = false;
+          // Ensure assets are present and upgraded to latest clean versions
           if (typeof DEFAULT_ASSETS !== 'undefined' && DEFAULT_ASSETS.logo) {
-            if (!parsed.examInfo.logoUrl ||
-                parsed.examInfo.logoUrl === 'assets/logo.png' ||
-                parsed.examInfo.logoUrl === 'assets/logo.jpg' ||
-                (typeof parsed.examInfo.logoUrl === 'string' && parsed.examInfo.logoUrl.startsWith('data:image/jpeg'))) {
+            const currentLogo = parsed.examInfo.logoUrl || '';
+            const isOldSampleLogo = !currentLogo ||
+                                   currentLogo === 'assets/logo.png' ||
+                                   currentLogo === 'assets/logo.jpg' ||
+                                   currentLogo.includes('iVBORw0KGgoAAAANSUhEUgAAAHAAAABy') ||
+                                   currentLogo.startsWith('data:image/jpeg') ||
+                                   (currentLogo.startsWith('data:image/png') && currentLogo.length < 50000);
+            if (isOldSampleLogo) {
               parsed.examInfo.logoUrl = DEFAULT_ASSETS.logo;
+              upgraded = true;
             }
           }
           if (!parsed.examInfo.dividerUrl && typeof DEFAULT_ASSETS !== 'undefined') {
             parsed.examInfo.dividerUrl = DEFAULT_ASSETS.divider;
+            upgraded = true;
           }
           if (!parsed.examInfo.dividerType || parsed.examInfo.dividerType === 'image') {
             parsed.examInfo.dividerType = 'svg';
+            upgraded = true;
           }
           if (!parsed.examInfo.bgUrl && typeof DEFAULT_ASSETS !== 'undefined' && DEFAULT_ASSETS.background) {
             parsed.examInfo.bgUrl = DEFAULT_ASSETS.background;
+            upgraded = true;
+          }
+          if (upgraded) {
+            try {
+              localStorage.setItem('exam_badge_state_v1', JSON.stringify(parsed));
+              saveToIndexedDB(parsed);
+            } catch (e) {}
           }
           if (!parsed.examInfo.logoSize) parsed.examInfo.logoSize = 28;
           if (!parsed.examInfo.roleFontSize) parsed.examInfo.roleFontSize = 22;
