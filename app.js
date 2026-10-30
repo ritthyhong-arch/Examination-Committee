@@ -236,6 +236,14 @@ class BadgeApp {
           if (!parsed.examInfo.logoUrl && typeof DEFAULT_ASSETS !== 'undefined') {
             parsed.examInfo.logoUrl = DEFAULT_ASSETS.logo;
           }
+          if (typeof DEFAULT_ASSETS !== 'undefined' && DEFAULT_ASSETS.logo) {
+            if (!parsed.examInfo.logoUrl ||
+                parsed.examInfo.logoUrl === 'assets/logo.png' ||
+                parsed.examInfo.logoUrl === 'assets/logo.jpg' ||
+                (typeof parsed.examInfo.logoUrl === 'string' && parsed.examInfo.logoUrl.startsWith('data:image/jpeg'))) {
+              parsed.examInfo.logoUrl = DEFAULT_ASSETS.logo;
+            }
+          }
           if (!parsed.examInfo.dividerUrl && typeof DEFAULT_ASSETS !== 'undefined') {
             parsed.examInfo.dividerUrl = DEFAULT_ASSETS.divider;
           }
